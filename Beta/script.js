@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('.nav-link');
+    const viewProjectBtns = document.querySelectorAll('.view-projects-btn');
     const sections = document.querySelectorAll('.section');
   
     function switchSection(sectionId) {
@@ -24,24 +25,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     // Redirection on 5 clicks for Play link
-    document.addEventListener('DOMContentLoaded', () => {
-        const playLink = document.getElementById("play-link");
-        
-        if (playLink) { // Ensure the element exists
-            let playClickCount = 0;
+    const playLink = document.getElementById("play-link");
     
-            // Add event listener to the Play link
-            playLink.addEventListener('click', () => {
-                playClickCount++;
-                console.log(playClickCount);
-                if (playClickCount === 5) {
-                    window.location.href = "";
-                }
-            });
-        } else {
-            console.error("Element with id 'play-link' not found in the DOM.");
-        }
-    });
+    if (playLink) { // Ensure the element exists
+        let playClickCount = 0;
+
+        // Add event listener to the Play link
+        playLink.addEventListener('click', () => {
+            playClickCount++;
+            console.log(playClickCount);
+            if (playClickCount === 5) {
+                window.location.href = "";
+            }
+        });
+    } else {
+        console.error("Element with id 'play-link' not found in the DOM.");
+    }
 
     const filterBtns = document.querySelectorAll('.filter-btn');
     const projectCards = document.querySelectorAll('.project-card');
@@ -204,4 +203,36 @@ document.addEventListener('DOMContentLoaded', () => {
             behavior: 'smooth'
         });
     });
+
+    // Add event listeners to all "View Projects" buttons to navigate to the Play section
+    
+
+    viewProjectBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSection('play');
+        });
+    });
+
+    // Custom Cursor Movement
+    const customCursor = document.querySelector('.custom-cursor');
+
+    if (customCursor) {
+        document.addEventListener('mousemove', (e) => {
+            customCursor.style.top = `${e.clientY}px`;
+            customCursor.style.left = `${e.clientX}px`;
+        });
+
+        // Change cursor color on hovering interactive elements
+        const interactiveElements = document.querySelectorAll('a, button, .view-projects-btn');
+
+        interactiveElements.forEach(elem => {
+            elem.addEventListener('mouseenter', () => {
+                customCursor.style.background = 'var(--color-bg)';
+            });
+            elem.addEventListener('mouseleave', () => {
+                customCursor.style.background = 'var(--color-primary)';
+            });
+        });
+    }
 });

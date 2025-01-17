@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('.nav-link');
+    const viewProjectBtns = document.querySelectorAll('.view-projects-btn');
     const sections = document.querySelectorAll('.section');
   
     function switchSection(sectionId) {
@@ -202,6 +203,67 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollBy({
             top: window.innerHeight,
             behavior: 'smooth'
+        });x
+    });
+
+    // Add event listeners to all "View Projects" buttons to navigate to the Play section
+    
+
+    viewProjectBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSection('play');
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const playLink = document.getElementById("play-link");
+    
+    if (playLink) {
+        // Add event listener to the Play link
+        playLink.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default anchor behavior
+            
+            const projectsSection = document.querySelector('#projects');
+            if (projectsSection) {
+                projectsSection.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            } else {
+                console.error("Projects section not found");
+            }
+        });
+    } else {
+        console.error("Element with id 'play-link' not found in the DOM.");
+    }
+});
+
+const filterBtns = document.querySelectorAll('.filter-btn');
+const projectCards = document.querySelectorAll('.project-card');
+
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const language = btn.getAttribute('data-language');
+
+        projectCards.forEach(card => {
+            if (language === 'all') {
+                card.style.display = 'block';
+                setTimeout(() => card.style.opacity = '1', 0);
+            } else {
+                const cardLanguages = card.getAttribute('data-languages').split(' ');
+                if (cardLanguages.includes(language)) {
+                    card.style.display = 'block';
+                    setTimeout(() => card.style.opacity = '1', 0);
+                } else {
+                    card.style.opacity = '0';
+                    setTimeout(() => card.style.display = 'none', 300);
+                }
+            }
         });
     });
 });
