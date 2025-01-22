@@ -1,93 +1,92 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css"/>
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-    <title>Einheitenumrechner</title>
+    <title>Funny Unit Converter</title>
 </head>
 <body>
     <div class="container">
-        <h1>🔄 Einheitenumrechner 🔄</h1>
+        <h1>🔄 Unit Converter 🔄</h1>
         
         <div class="converter-box">
             <div class="input-group">
-                <input type="number" id="input-value" placeholder="Wert eingeben">
+                <input type="number" id="input-value" placeholder="Enter value">
                 <select id="input-unit">
                     <option value="meter">Meter 📏</option>
                     <option value="kilometer">Kilometer 🗺️</option>
-                    <option value="elefant">Elefant 🐘</option>
-                    <option value="feet">Fuß 👣</option>
-                    <option value="gold_nugget">Goldnugget 💎</option>
-                    <option value="american_eagle">Amerikanischer Adler 🦅</option>
+                    <option value="elefant">Elephant 🐘</option>
+                    <option value="feet">Feet 👣</option>
+                    <option value="gold_nugget">Gold Nugget 💎</option>
+                    <option value="american_eagle">American Eagle 🦅</option>
                 </select>
             </div>
 
             <div class="input-group">
-                <label>Umrechnen in:</label>
+                <label>Convert to:</label>
                 <select id="output-unit">
                     <option value="meter">Meter 📏</option>
                     <option value="kilometer">Kilometer 🗺️</option>
-                    <option value="elefant">Elefant 🐘</option>
-                    <option value="feet">Fuß 👣</option>
-                    <option value="gold_nugget">Goldnugget 💎</option>
-                    <option value="american_eagle">Amerikanischer Adler 🦅</option>
+                    <option value="elefant">Elephant 🐘</option>
+                    <option value="feet">Feet 👣</option>
+                    <option value="gold_nugget">Gold Nugget 💎</option>
+                    <option value="american_eagle">American Eagle 🦅</option>
                 </select>
             </div>
 
-            <button id="convert-btn" py-click="calculate_conversion()">Umrechnen</button>
+            <button id="convert-btn">Convert</button>
             
             <div id="result" class="result">
-                Ergebnis erscheint hier
+                Result appears here
             </div>
         </div>
     </div>
 
-    <py-script>
-# Umrechnungsfunktionen direkt hier definiert
-def convert_distance(value, input_unit, output_unit):
-    # Umrechnungsfaktoren (basierend auf Meter)
-    conversion_factors = {
-        "meter": 1,
-        "kilometer": 1000,
-        "elefant": 6,  # Ein durchschnittlicher Elefant ist etwa 6 Meter lang
-        "feet": 0.3048,  # 1 Fuß = 0,3048 Meter
-        "gold_nugget": 0.02,  # Ein Goldnugget ist etwa 2cm lang
-        "american_eagle": 0.76  # Flügelspannweite eines Weißkopfseeadlers ≈ 76cm
-    }
-    
-    # Emoji-Zuordnung
-    unit_emojis = {
-        "meter": "📏",
-        "kilometer": "🗺️",
-        "elefant": "🐘",
-        "feet": "👣",
-        "gold_nugget": "💎",
-        "american_eagle": "🦅"
-    }
-    
-    # Umrechnung in Meter
-    meters = value * conversion_factors[input_unit]
-    
-    # Umrechnung in Zieleinheit
-    result = meters / conversion_factors[output_unit]
-    
-    return f"{result:.2f} {unit_emojis[output_unit]}"
+    <script>
+    function convertDistance(value, inputUnit, outputUnit) {
+        const conversionFactors = {
+            meter: 1,
+            kilometer: 1000,
+            elefant: 6, 
+            feet: 0.3048,  
+            gold_nugget: 0.02,  
+            american_eagle: 0.76  
+        };
 
-def calculate_conversion():
-    try:
-        value = float(Element('input-value').value)
-        input_unit = Element('input-unit').value
-        output_unit = Element('output-unit').value
-        
-        result = convert_distance(value, input_unit, output_unit)
-        Element('result').write(f"{value} {input_unit} = {result}")
-    except ValueError:
-        Element('result').write("❌ Fehler: Bitte geben Sie eine gültige Zahl ein!")
-    except Exception as e:
-        Element('result').write(f"❌ Fehler: {str(e)}")
-    </py-script>
+        const unitEmojis = {
+            meter: "📏",
+            kilometer: "🗺️",
+            elefant: "🐘",
+            feet: "👣",
+            gold_nugget: "💎",
+            american_eagle: "🦅"
+        };
+
+        const meters = value * conversionFactors[inputUnit];
+        const result = meters / conversionFactors[outputUnit];
+        return `${result.toFixed(2)} ${unitEmojis[outputUnit]}`;
+    }
+
+    function calculateConversion() {
+        try {
+            const value = parseFloat(document.getElementById('input-value').value);
+            const inputUnit = document.getElementById('input-unit').value;
+            const outputUnit = document.getElementById('output-unit').value;
+
+            if (isNaN(value)) {
+                document.getElementById('result').innerText = "❌ Error: Please enter a valid number!";
+                return;
+            }
+
+            const result = convertDistance(value, inputUnit, outputUnit);
+            document.getElementById('result').innerText = `${value} ${inputUnit} = ${result}`;
+        } catch (e) {
+            document.getElementById('result').innerText = `❌ Error: ${e}`;
+        }
+    }
+
+    document.getElementById('convert-btn').addEventListener('click', calculateConversion);
+    </script>
 </body>
 </html>

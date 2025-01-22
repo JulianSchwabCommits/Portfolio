@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
-        deleteBtn.textContent = 'Löschen';
+        deleteBtn.textContent = 'Delete';
         
         li.appendChild(checkbox);
         li.appendChild(textContainer);

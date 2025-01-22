@@ -1,3 +1,13 @@
+:root {
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-surface-hover: #243b53;
+    --color-text: #e2e8f0;
+    --color-text-muted: #94a3b8;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -6,8 +16,8 @@
 }
 
 body {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    color: #fff;
+    background: var(--color-bg);
+    color: var(--color-text);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -17,7 +27,7 @@ body {
 .container {
     text-align: center;
     padding: 2rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-surface);
     border-radius: 20px;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -27,7 +37,7 @@ h1 {
     font-size: 3rem;
     margin-bottom: 2rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(45deg, #00ff87, #60efff);
+    background: var(--color-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -43,26 +53,28 @@ h1 {
 .status {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #fff;
+    color: var(--color-text);
 }
 
 .restart-btn {
-    
     padding: 0.8rem 1.5rem;
     font-size: 1rem;
-    background: linear-gradient(45deg, #00ff87, #60efff);
+    background: var(--color-primary);
     border: none;
-    border-radius: 25px;
-    color: #1a1a2e;
+    border-radius: 15px;
+    color: var(--color-bg);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: background 0.3s ease, transform 0.2s;
     height: 5rem;
     width: 20rem;
 }
 
 .restart-btn:hover {
+    background: var(--color-primary-dark);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 255, 135, 0.4);
+    border-radius: 15px;
+    transition: background 0.3s ease, transform 0.2s;
 }
 
 .board {
@@ -75,7 +87,7 @@ h1 {
 .cell {
     width: 100px;
     height: 100px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-surface);
     border-radius: 15px;
     display: flex;
     justify-content: center;
@@ -83,11 +95,14 @@ h1 {
     font-size: 3rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: 2px solid var(--color-primary-dark);
 }
 
 .cell:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--color-surface-hover);
     transform: scale(1.05);
+    border-radius: 10px;
+    transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .cell.x {
@@ -103,7 +118,7 @@ h1 {
     justify-content: space-around;
     margin-top: 2rem;
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-surface);
     border-radius: 15px;
 }
 
@@ -116,13 +131,13 @@ h1 {
 
 .player {
     font-size: 1.2rem;
-    color: #fff;
+    color: var(--color-text);
 }
 
 .score span:last-child {
     font-size: 2rem;
     font-weight: bold;
-    background: linear-gradient(45deg, #00ff87, #60efff);
+    background: var(--color-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }

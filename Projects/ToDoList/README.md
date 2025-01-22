@@ -1,18 +1,17 @@
-#ToDoList
+# ToDoList
 
 Todo for todo:
 
--   Add Importance || Low, Medium, High to tags
+- Add Importance || Low, Medium, High to tags
 
--   Add grouping 
+- Add grouping 
 
--   Keyboard shortcuts
+- Keyboard shortcuts
 
--   Add due to date with statistics
+- Add due date with statistics
 
+What have I Learned? 
 
-What have i Learned? 
+- DOM Manipulation JavaScript
 
--   DOM Manipulation Javascript
-
--   Event Handling / Callbacks.
+- Event Handling / Callbacks.

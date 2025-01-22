@@ -1,3 +1,15 @@
+:root {
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-surface-hover: #243b53;
+    --color-text: #e2e8f0;
+    --color-text-muted: #94a3b8;
+    --color-white: #fff;
+    font-family: "Poppins", sans-serif;
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -5,25 +17,40 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #e0f7fa; 
+    background-color: var(--color-bg);
+    font-family: var(--font-family);
+}
+
+.score-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
 }
 
 canvas {
-    border: 2px solid #00796b;
-    background-color: #a5d6a7; 
+    border: 2px solid var(--color-primary);
+    background-color: var(--color-surface);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 #score, #highscore {
     font-size: 20px;
     margin: 5px;
-    color: #004d40;
+    color: var(--color-text);
     font-weight: bold;
+    border: 2px solid var(--color-text-muted);
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: box-shadow 0.3s ease;
+}
+
+#score:hover, #highscore:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 #gameOver {
     font-size: 30px;
-    color: #d32f2f;
+    color: var(--color-primary);
     font-weight: bold;
     margin-top: 20px;
 }
@@ -32,14 +59,67 @@ canvas {
     font-size: 20px;
     padding: 10px 20px;
     margin-top: 20px;
-    background-color: #00796b;
-    color: white;
+    background-color: var(--color-primary);
+    color: var(--color-white);
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 
 #restartButton:hover {
-    background-color: #004d40;
+    background-color: var(--color-primary-dark);
 }
-    
+
+@media (max-width: 600px) {
+    body {
+        height: auto;
+        padding: 10px;
+    }
+
+    canvas {
+        width: 100%;
+        height: auto;
+    }
+
+    .score-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .joystick-container {
+        display: block;
+    }
+}
+
+/* Add joystick styles */
+.joystick-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 20px auto;
+}
+
+.joystick-base {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+    position: relative;
+}
+
+.joystick-knob {
+    width: 60px;
+    height: 60px;
+    background-color: var(--color-primary);
+    border: 2px solid var(--color-primary-dark);
+    border-radius: 50%;
+    position: absolute;
+    top: 45px;
+    left: 45px;
+    touch-action: none;
+    transition: background-color 0.3s;
+}
+
+.joystick-knob.active {
+    background-color: var(--color-primary-dark);
+}

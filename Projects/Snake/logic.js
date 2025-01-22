@@ -37,14 +37,14 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = (i == 0) ? '#388E3C' : '#66BB6A';
+        ctx.fillStyle = (i == 0) ? '#3b82f6' : '#2563eb'; // Updated colors
         ctx.fillRect(snake[i].x, snake[i].y, box, box);
 
-        ctx.strokeStyle = '#004d40';
+        ctx.strokeStyle = '#94a3b8'; // Updated stroke color
         ctx.strokeRect(snake[i].x, snake[i].y, box, box);
     }
 
-    ctx.fillStyle = '#FF5252';
+    ctx.fillStyle = '#FF5252'; // You can update this if needed
     ctx.fillRect(apple.x, apple.y, box, box);
 
     let snakeX = snake[0].x;
