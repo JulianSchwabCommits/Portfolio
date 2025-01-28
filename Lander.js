@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById(sectionId).classList.add('active');
         document.querySelector(`.nav-link[data-section="${sectionId}"]`).classList.add('active');
-    }
+    } //  
+    
 
     // Navigation Links
     navLinks.forEach(link => {
