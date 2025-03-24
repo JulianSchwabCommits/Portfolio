@@ -85,7 +85,12 @@ const Contact = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-                  className="glass-morphism rounded-xl p-4 hover-scale"
+                  className="glass-morphism rounded-xl p-4 transition-all duration-300 hover:bg-white/10 hover:shadow-lg hover:-translate-y-1"
+                  whileHover={{ 
+                    scale: 1.05,
+                    transition: { duration: 0.2 }
+                  }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <a 
                     href={item.href} 
@@ -93,7 +98,7 @@ const Contact = () => {
                     rel="noopener noreferrer" 
                     className="flex items-center gap-4"
                   >
-                    <div className="p-2 rounded-full bg-white/10">
+                    <div className="p-2 rounded-full bg-white/10 transition-all duration-300 group-hover:bg-white/15">
                       {item.icon}
                     </div>
                     <div>
