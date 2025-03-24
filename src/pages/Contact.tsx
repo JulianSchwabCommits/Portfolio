@@ -40,7 +40,7 @@ const contactInfo = [
 const Contact = () => {
   return (
     <PageTransition>
-      <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 pt-24 pb-20">
         <motion.div 
           className="flex flex-col items-center justify-center text-center mb-16"
           initial="hidden"

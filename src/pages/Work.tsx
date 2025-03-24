@@ -1,6 +1,5 @@
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import PageTransition from "../components/PageTransition";
 import Hero from "../components/Hero";
 import WorkExperience from "../components/WorkExperience";
@@ -39,7 +38,7 @@ const experienceData = [
 const Work = () => {
   return (
     <PageTransition>
-      <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 pt-24 pb-20">
         <Hero />
         
         <motion.div
