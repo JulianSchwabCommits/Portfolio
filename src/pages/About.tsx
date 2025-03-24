@@ -61,8 +61,7 @@ const About = () => {
               </p>
               
               <p className="text-lg text-gray-300">
-                With expertise in full-stack development, I specialize in building scalable web applications 
-                using modern technologies like React, TypeScript, and Node.js.
+                With expertise in both front end and AI development, I specialize in building engaging user interfaces with React, TypeScript, and TailwindCSS, as well as AI-powered solutions with Python.
               </p>
               
               <p className="text-lg text-gray-300">

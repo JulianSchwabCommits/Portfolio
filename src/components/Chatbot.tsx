@@ -15,7 +15,7 @@ const responses = {
   greeting: ["Hello!", "Hi there!", "Hey! How can I help?"],
   about: [
     "Julian is an Application Developer at Swisscom. He's passionate about creating elegant solutions to complex problems.",
-    "Julian specializes in building scalable web applications using modern technologies like React, TypeScript, and Node.js."
+    "Julian specializes in buil ding scalable web applications using modern technologies like React, TypeScript, and Node.js."
   ],
   skills: [
     "Julian is proficient in React, TypeScript, Node.js, Python, and various other technologies.",
@@ -30,9 +30,9 @@ const responses = {
     "He's been working on various projects involving modern web technologies and game engines."
   ],
   default: [
-    "I'm not sure I understand. Could you rephrase your question? You can also reach out to me via <a href=\"mailto:me@julianschwab.dev\">email</a>.",
-    "Interesting question! Julian might be able to answer that directly. You can reach him at <a href=\"mailto:me@julianschwab.dev\">me@julianschwab.dev</a>.",
-    "Let me connect you with Julian for more specific information on that topic. His email is <a href=\"mailto:me@julianschwab.dev\">me@julianschwab.dev</a>."
+    "I'm not sure I understand. Could you rephrase your question? You can also reach out to me via email.",
+    "Interesting question! Julian might be able to answer that directly. You can also reach out to me via email.",
+    "Let me connect you with Julian for more specific information on that topic. You can also reach out to me via email."
   ]
 };
 
