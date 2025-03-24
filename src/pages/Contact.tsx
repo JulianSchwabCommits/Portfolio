@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Mail, Phone, Github, Linkedin, MessageSquare } from "lucide-react";
 import PageTransition from "../components/PageTransition";
@@ -8,32 +7,26 @@ const contactInfo = [
   {
     icon: <Mail className="w-5 h-5" />,
     label: "Email",
-    value: "julian@example.com",
-    href: "mailto:julian@example.com"
+    value: "me@julianschwab.dev",
+    href: "mailto:me@julianschwab.dev"
   },
   {
     icon: <Phone className="w-5 h-5" />,
     label: "Phone",
-    value: "+1 (555) 123-4567",
-    href: "tel:+15551234567"
+    value: "+41 77 460 46 59",
+    href: "tel:+41774604659"
   },
   {
     icon: <Github className="w-5 h-5" />,
     label: "GitHub",
-    value: "github.com/juliancoder",
-    href: "https://github.com"
+    value: "github.com/JulianSchwabCommits",
+    href: "https://github.com/JulianSchwabCommits"
   },
   {
     icon: <Linkedin className="w-5 h-5" />,
     label: "LinkedIn",
-    value: "linkedin.com/in/juliancoder",
-    href: "https://linkedin.com"
-  },
-  {
-    icon: <MessageSquare className="w-5 h-5" />,
-    label: "Intranet",
-    value: "intranet.company.com",
-    href: "https://intranet.company.com"
+    value: "linkedin.com/in/julian-schwab",
+    href: "https://www.linkedin.com/in/julian-schwab-680349263"
   }
 ];
 

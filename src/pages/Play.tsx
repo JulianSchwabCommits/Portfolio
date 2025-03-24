@@ -1,56 +1,47 @@
-
 import { motion } from "framer-motion";
 import PageTransition from "../components/PageTransition";
 import ProjectCard from "../components/ProjectCard";
 
 const projects = [
   {
-    title: "Personal AI Assistant",
-    subtitle: "AI-powered productivity tool",
-    description: "A smart assistant that helps with daily tasks using natural language processing.",
-    year: "2024",
-    technologies: ["React", "TypeScript", "OpenAI", "TailwindCSS"],
-    link: "#"
-  },
-  {
-    title: "Smart Home Dashboard",
-    subtitle: "IoT Control Center",
-    description: "A centralized dashboard for managing smart home devices and monitoring energy usage.",
-    year: "2024",
-    technologies: ["React", "IoT", "Real-time Data", "Charts"],
-    link: "#"
-  },
-  {
-    title: "Crypto Portfolio Tracker",
-    subtitle: "Financial Management Tool",
-    description: "Track and analyze cryptocurrency investments with real-time data and visualizations.",
+    title: "VisualizeAlgs",
+    subtitle: "Algorithm Visualization Tool",
+    description: "Interactive platform for visualizing common algorithms and data structures.",
     year: "2023",
-    technologies: ["React", "TypeScript", "API Integration", "Charts"],
-    link: "#"
+    technologies: ["HTML", "CSS", "JavaScript"],
+    link: "https://algs.julianschwab.dev"
   },
   {
-    title: "Weather App",
-    subtitle: "Location-based Weather Service",
-    description: "Elegant weather forecasting application with interactive maps and alerts.",
+    title: "Games Hub",
+    subtitle: "Collection of Web Games",
+    description: "A hub for simple, fun browser games built with vanilla web technologies.",
     year: "2023",
-    technologies: ["React Native", "APIs", "Geolocation"],
-    link: "#"
+    technologies: ["HTML", "CSS", "JavaScript"],
+    link: "https://play.julianschwab.dev"
   },
   {
-    title: "Task Management System",
-    subtitle: "Productivity Application",
-    description: "Collaborative task management system with real-time updates and priority sorting.",
-    year: "2022",
-    technologies: ["React", "Node.js", "MongoDB", "WebSockets"],
-    link: "#"
+    title: "Chat",
+    subtitle: "AI Chatbot Interface",
+    description: "Modern AI chatbot that connects to Openrouter API with a sleek, responsive UI.",
+    year: "2024",
+    technologies: ["React", "OpenRouter API", "TailwindCSS"],
+    link: "https://chat.julianschwab.dev"
   },
   {
-    title: "E-commerce Platform",
-    subtitle: "Online Shopping Solution",
-    description: "Full-featured e-commerce platform with product management, cart, and checkout.",
-    year: "2022",
-    technologies: ["Next.js", "Stripe", "MongoDB", "Authentication"],
-    link: "#"
+    title: "FaceRecognition",
+    subtitle: "Facial Analysis Tool",
+    description: "Application for face detection and recognition using Deepface technology.",
+    year: "2023",
+    technologies: ["Python", "Deepface", "Computer Vision"],
+    link: "https://github.com/JulianSchwabCommits/FaceRecognition"
+  },
+  {
+    title: "Portfolio",
+    subtitle: "Personal Showcase",
+    description: "Modern, responsive portfolio website showcasing projects and professional experience.",
+    year: "2024",
+    technologies: ["React", "Vite", "TailwindCSS", "Framer Motion"],
+    link: "https://julianschwab.dev"
   }
 ];
 

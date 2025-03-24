@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import PageTransition from "../components/PageTransition";
 
@@ -67,8 +66,7 @@ const About = () => {
               </p>
               
               <p className="text-lg text-gray-300">
-                When I'm not coding, you can find me exploring new technologies, contributing to open-source 
-                projects, or sharing my knowledge with the developer community.
+              When I'm not coding, I'm exploring new technologies, kitesurfing or hiking in nature, and staying active at the gym.
               </p>
             </motion.div>
             
@@ -84,13 +82,13 @@ const About = () => {
           }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="glass-morphism rounded-2xl overflow-hidden aspect-[3/4] hover-scale">
                 <div className="w-full h-full bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
-                  <p className="text-sm text-gray-400">Image 1</p>
+                  <img src="/julian.jpg" alt="Julian Schwab" className="w-full h-full object-cover" />
                 </div>
               </div>
               
               <div className="glass-morphism rounded-2xl overflow-hidden aspect-[3/4] hover-scale">
                 <div className="w-full h-full bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
-                  <p className="text-sm text-gray-400">Image 2</p>
+                  <img src="/kiting.jpg" alt="Julian kiteboarding" className="w-full h-full object-cover" />
                 </div>
               </div>
             </motion.div>

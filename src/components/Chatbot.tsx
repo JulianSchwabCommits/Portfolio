@@ -30,9 +30,9 @@ const responses = {
     "He's been working on various projects involving modern web technologies and game engines."
   ],
   default: [
-    "I'm not sure I understand. Could you rephrase your question?",
-    "Interesting question! Julian might be able to answer that directly.",
-    "Let me connect you with Julian for more specific information on that topic."
+    "I'm not sure I understand. Could you rephrase your question? You can also reach out to me via <a href=\"mailto:me@julianschwab.dev\">email</a>.",
+    "Interesting question! Julian might be able to answer that directly. You can reach him at <a href=\"mailto:me@julianschwab.dev\">me@julianschwab.dev</a>.",
+    "Let me connect you with Julian for more specific information on that topic. His email is <a href=\"mailto:me@julianschwab.dev\">me@julianschwab.dev</a>."
   ]
 };
 

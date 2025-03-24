@@ -1,4 +1,3 @@
-
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import PageTransition from "../components/PageTransition";
@@ -51,10 +50,65 @@ const experienceData = [
 ];
 
 const Work = () => {
+  const [show_arrow, set_show_arrow] = useState(true);
+  
+  useEffect(() => {
+    const handle_scroll = () => {
+      if (window.scrollY > 100) {
+        set_show_arrow(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handle_scroll);
+    return () => window.removeEventListener('scroll', handle_scroll);
+  }, []);
+  
+  const ScrollArrow = () => {
+    return (
+      <motion.div 
+        className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-10 cursor-pointer"
+        initial={{ y: 0, opacity: 1 }}
+        animate={{ 
+          y: [0, 10, 0],
+          opacity: show_arrow ? 1 : 0
+        }}
+        transition={{ 
+          y: { repeat: Infinity, duration: 1.5 },
+          opacity: { duration: 0.3 }
+        }}
+        onClick={() => {
+          window.scrollBy({
+            top: window.innerHeight * 0.8,
+            behavior: 'smooth'
+          });
+          set_show_arrow(false);
+        }}
+      >
+        <svg 
+          width="40" 
+          height="40" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          className="text-white opacity-80 hover:opacity-100 transition-opacity"
+        >
+          <path 
+            d="M7 10L12 15L17 10" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+          />
+        </svg>
+      </motion.div>
+    );
+  };
+
   return (
     <PageTransition>
       <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
         <Hero />
+        <ScrollArrow />
         
         <motion.div
           initial={{ opacity: 0, y: 30 }}
