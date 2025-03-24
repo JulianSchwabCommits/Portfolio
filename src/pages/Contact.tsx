@@ -1,6 +1,6 @@
 
 import { motion } from "framer-motion";
-import { Mail, Phone, Github, Linkedin, Twitter } from "lucide-react";
+import { Mail, Phone, Github, Linkedin, MessageSquare } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import Chatbot from "../components/Chatbot";
 
@@ -30,10 +30,10 @@ const contactInfo = [
     href: "https://linkedin.com"
   },
   {
-    icon: <Twitter className="w-5 h-5" />,
-    label: "Twitter",
-    value: "@juliancoder",
-    href: "https://twitter.com"
+    icon: <MessageSquare className="w-5 h-5" />,
+    label: "Intranet",
+    value: "intranet.company.com",
+    href: "https://intranet.company.com"
   }
 ];
 
