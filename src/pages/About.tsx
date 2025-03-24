@@ -1,33 +1,44 @@
+
 import { motion } from "framer-motion";
 import PageTransition from "../components/PageTransition";
+
 const About = () => {
-  return <PageTransition>
-      <div className="max-w-7xl mx-auto px-4 pt-24 pb-20">
-        <motion.div initial="hidden" animate="visible" variants={{
-        hidden: {
-          opacity: 0
-        },
-        visible: {
-          opacity: 1,
-          transition: {
-            staggerChildren: 0.15
-          }
-        }
-      }} className="flex flex-col items-center justify-center text-center mb-16 mx-[5px] my-[19px]">
-          <motion.h1 className="text-4xl md:text-5xl font-serif mb-8" variants={{
-          hidden: {
-            opacity: 0,
-            y: 50
-          },
-          visible: {
-            opacity: 1,
-            y: 0,
-            transition: {
-              duration: 0.7,
-              ease: "easeOut"
+  return (
+    <PageTransition>
+      <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
+        <motion.div 
+          initial="hidden" 
+          animate="visible" 
+          variants={{
+            hidden: {
+              opacity: 0
+            },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.15
+              }
             }
-          }
-        }}>
+          }} 
+          className="flex flex-col items-center justify-center text-center mb-16 mx-[5px] my-[19px]"
+        >
+          <motion.h1 
+            className="text-4xl md:text-5xl font-serif mb-8" 
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: 50
+              },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 0.7,
+                  ease: "easeOut"
+                }
+              }
+            }}
+          >
             About Me
           </motion.h1>
         </motion.div>
@@ -86,6 +97,8 @@ const About = () => {
           </div>
         </div>
       </div>
-    </PageTransition>;
+    </PageTransition>
+  );
 };
+
 export default About;
