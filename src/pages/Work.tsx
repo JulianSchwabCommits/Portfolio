@@ -7,32 +7,46 @@ import WorkExperience from "../components/WorkExperience";
 
 const experienceData = [
   {
-    title: "Application Developer",
+    title: "AI Development",
+    company: "AppStream, Swisscom",
+    period: "2024-Present",
+    description: "Designing and implementing AI-powered features at AppStream to enhance business automation and decision-making.",
+    technologies: ["Python", "Machine Learning", "Ollama"]
+  },
+  {
+    title: "Machine Learning Development",
+    company: "Personal",
+    period: "2024-Present",
+    description: "Exploring and implementing machine learning models for predictive analytics and automation. Learning from 'Hands-On Machine Learning' while applying concepts to real-world projects.",
+    technologies: ["Python", "scikit-learn", "TensorFlow", "PyTorch", "Pandas", "NumPy", "Matplotlib"]
+  },
+  {
+    title: "RPA Development",
     company: "Swisscom",
-    period: "2021-Present",
-    description: "Developing and maintaining enterprise-level applications. Working with cross-functional teams to deliver high-quality software solutions.",
-    technologies: ["React", "TypeScript", "Node.js", "AWS"]
+    period: "2023-2024",
+    description: "Automating business processes using UiPath RPA platform.",
+    technologies: ["RPA", "UiPath Studio", "UiPath Orchestrator", "Automations"]
+  },
+  {
+    title: "Game Development",
+    company: "Personal",
+    period: "2023-2024",
+    description: "Creating immersive 3D experiences with Unreal Engine 5.",
+    technologies: ["Unreal Engine", "C++", "Blender"]
+  },
+  {
+    title: "Python Games",
+    company: "Personal",
+    period: "2022-2024",
+    description: "Collection of interactive Python games using Pygame.",
+    technologies: ["Python", "Pygame"]
   },
   {
     title: "Web Development",
     company: "Personal",
     period: "2021-Present",
     description: "Creating responsive and modern web experiences.",
-    technologies: ["React", "Next.js", "TailwindCSS"]
-  },
-  {
-    title: "Python Games",
-    company: "Personal",
-    period: "2022-Present",
-    description: "Collection of interactive Python games using Pygame",
-    technologies: ["Python", "Pygame"]
-  },
-  {
-    title: "Game Development",
-    company: "Personal",
-    period: "2023-2024",
-    description: "Creating immersive 3D experiences with Unreal Engine 5",
-    technologies: ["Unreal Engine", "C++", "Blender"]
+    technologies: ["React", "Vite", "TailwindCSS", "HTML", "CSS", "JavaScript"]
   }
 ];
 
