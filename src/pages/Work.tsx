@@ -8,7 +8,7 @@ import WorkExperience from "../components/WorkExperience";
 const experienceData = [
   {
     title: "AI Development",
-    company: "AppStream, Swisscom",
+    company: "Apps Team, Swisscom",
     period: "2024-Present",
     description: "Designing and implementing AI-powered features at AppStream to enhance business automation and decision-making.",
     technologies: ["Python", "Machine Learning", "Ollama"]
