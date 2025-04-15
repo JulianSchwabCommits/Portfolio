@@ -68,25 +68,20 @@ const SearchPopup = () => {
     { id: 5, title: 'Contact', type: 'route' }
   ];
 
-  const all_results = [
-    ...static_results,
-    ...(search ? projects.filter(p => p.title.toLowerCase().includes(search.toLowerCase())) : []),
-    ...(search ? experiences.filter(e => e.title.toLowerCase().includes(search.toLowerCase())) : [])
-  ].filter(item => {
+  const get_filtered_results = () => {
     if (!search) {
-      return item.type === 'theme' || item.type === 'route';
+      return static_results;
     }
-    if (search.toLowerCase() === 'route') {
-      return item.type === 'route';
-    } else if (search.toLowerCase() === 'theme') {
-      return item.type === 'theme';
-    } else if (search.toLowerCase() === 'project') {
-      return item.type === 'project';
-    } else if (search.toLowerCase() === 'experience') {
-      return item.type === 'experience';
-    }
-    return item.title.toLowerCase().includes(search.toLowerCase());
-  });
+    
+    const search_lower = search.toLowerCase();
+    return [
+      ...static_results.filter(item => item.title.toLowerCase().includes(search_lower)),
+      ...projects.filter(item => item.title.toLowerCase().includes(search_lower)),
+      ...experiences.filter(item => item.title.toLowerCase().includes(search_lower))
+    ];
+  };
+
+  const filtered_results = get_filtered_results();
 
   useEffect(() => {
     const handle_keydown = (e: KeyboardEvent) => {
@@ -108,13 +103,13 @@ const SearchPopup = () => {
   const handle_keydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      set_selected_index(prev => Math.min(prev + 1, all_results.length - 1));
+      set_selected_index(prev => Math.min(prev + 1, filtered_results.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       set_selected_index(prev => Math.max(prev - 1, 0));
-    } else if (e.key === 'Enter' && all_results.length > 0) {
+    } else if (e.key === 'Enter' && filtered_results.length > 0) {
       e.preventDefault();
-      const selected_item = all_results[selected_index];
+      const selected_item = filtered_results[selected_index];
       handle_selection(selected_item);
     }
   };
@@ -162,11 +157,11 @@ const SearchPopup = () => {
                 autoFocus
               />
               
-              {all_results.length > 0 && (
+              {filtered_results.length > 0 && (
                 <div className="mt-2 space-y-1">
-                  {all_results.map((result, index) => (
+                  {filtered_results.map((result, index) => (
                     <div
-                      key={result.id}
+                      key={`${result.type}-${result.id}`}
                       className={`p-2 rounded cursor-pointer transition-colors ${
                         index === selected_index 
                           ? 'border border-white/20' 
