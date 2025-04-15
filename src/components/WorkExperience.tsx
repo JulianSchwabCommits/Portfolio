@@ -1,5 +1,5 @@
-
 import { motion } from "framer-motion";
+import { use_theme } from "../context/ThemeContext";
 
 interface ExperienceProps {
   title: string;
@@ -16,6 +16,8 @@ const WorkExperience = ({
   description,
   technologies,
 }: ExperienceProps) => {
+  const { theme } = use_theme();
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -27,12 +29,12 @@ const WorkExperience = ({
       <div className="flex flex-col md:flex-row md:justify-between mb-4">
         <div>
           <h3 className="text-2xl font-semibold mb-1">{title}</h3>
-          <p className="text-gray-400 mb-2">@{company}</p>
+          <p className={`${theme === 'light' ? 'text-gray-600' : 'text-gray-400'} mb-2`}>@{company}</p>
         </div>
-        <div className="text-gray-400 md:text-right">{period}</div>
+        <div className={`${theme === 'light' ? 'text-gray-600' : 'text-gray-400'} md:text-right`}>{period}</div>
       </div>
       
-      <p className="mb-4 text-gray-300">{description}</p>
+      <p className={`mb-4 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>{description}</p>
       
       {technologies && technologies.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-4">

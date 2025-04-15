@@ -40,3 +40,82 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Theme styles */
+:root {
+  --text-color: hsl(0, 0%, 98%);
+  --bg-color: hsl(240, 10%, 3.9%);
+  --card-bg: hsl(240, 10%, 3.9%);
+  --border-color: hsl(240, 3.7%, 15.9%);
+  --primary-color: hsl(0, 0%, 98%);
+  --muted-color: hsl(240, 5%, 64.9%);
+  transition: all 0.3s ease;
+}
+
+html.light-mode {
+  --text-color: hsl(240, 10%, 3.9%);
+  --bg-color: hsl(0, 0%, 98%);
+  --card-bg: hsl(0, 0%, 100%);
+  --border-color: hsl(240, 5%, 84%);
+  --primary-color: hsl(240, 5.9%, 10%);
+  --muted-color: hsl(240, 3.7%, 40%);
+}
+
+html.dark-mode {
+  --text-color: hsl(0, 0%, 98%);
+  --bg-color: hsl(240, 10%, 3.9%);
+  --card-bg: hsl(240, 10%, 3.9%);
+  --border-color: hsl(240, 3.7%, 15.9%);
+  --primary-color: hsl(0, 0%, 98%);
+  --muted-color: hsl(240, 5%, 64.9%);
+}
+
+html.light-mode body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+html.light-mode .glass-morphism {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+}
+
+html.light-mode .technologie-pill {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-color);
+}
+
+/* Additional light mode styles */
+html.light-mode a.glass-morphism {
+  color: #333;
+}
+
+html.light-mode a:hover {
+  color: #000;
+}
+
+html.light-mode a.glass-morphism:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+html.light-mode nav a {
+  color: #333;
+}
+
+html.light-mode nav a:hover {
+  color: #000;
+}
+
+html.light-mode button {
+  color: #333;
+}
+
+/* Override pointer-events for SVGs in buttons */
+button svg {
+  pointer-events: auto !important;
+}
+
+.theme-toggle-button svg {
+  pointer-events: auto !important;
+}

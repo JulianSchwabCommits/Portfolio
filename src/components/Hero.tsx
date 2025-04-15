@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { use_theme } from "../context/ThemeContext";
 
 const Hero = () => {
   const [show_arrow, set_show_arrow] = useState(true);
+  const { theme } = use_theme();
   
   useEffect(() => {
     const handle_scroll = () => {
@@ -59,7 +61,7 @@ const Hero = () => {
       </motion.h2>
       
       <motion.p 
-        className="text-xl md:text-2xl text-gray-400 max-w-xl text-center mx-auto"
+        className={`text-xl md:text-2xl ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'} max-w-xl text-center mx-auto`}
         variants={{
           hidden: { opacity: 0, y: 30 },
           visible: { 
@@ -98,7 +100,7 @@ const Hero = () => {
           viewBox="0 0 24 24" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="text-white opacity-80 hover:opacity-100 transition-opacity"
+          className={`${theme === 'light' ? 'text-black' : 'text-white'} opacity-80 hover:opacity-100 transition-opacity`}
         >
           <path 
             d="M7 10L12 15L17 10" 

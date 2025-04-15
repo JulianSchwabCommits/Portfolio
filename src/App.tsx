@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,9 @@ import About from "./pages/About";
 import Play from "./pages/Play";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import CursorShadow from "./components/CursorShadow";
+import SearchPopup from "./components/SearchPopup";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const queryClient = new QueryClient();
 
@@ -32,14 +34,18 @@ const AnimatedRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Navbar />
-        <AnimatedRoutes />
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <CursorShadow />
+          <Navbar />
+          <SearchPopup />
+          <AnimatedRoutes />
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

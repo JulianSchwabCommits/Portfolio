@@ -1,5 +1,5 @@
-
 import { motion } from "framer-motion";
+import { use_theme } from "../context/ThemeContext";
 
 interface ProjectCardProps {
   title: string;
@@ -18,6 +18,8 @@ const ProjectCard = ({
   technologies,
   link
 }: ProjectCardProps) => {
+  const { theme } = use_theme();
+  
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -30,12 +32,12 @@ const ProjectCard = ({
       <div className="flex flex-col md:flex-row md:justify-between mb-4">
         <div>
           <h3 className="text-2xl font-semibold mb-1">{title}</h3>
-          <p className="text-gray-400 mb-2">{subtitle}</p>
+          <p className={`${theme === 'light' ? 'text-gray-600' : 'text-gray-400'} mb-2`}>{subtitle}</p>
         </div>
-        <div className="text-gray-400 md:text-right">{year}</div>
+        <div className={`${theme === 'light' ? 'text-gray-600' : 'text-gray-400'} md:text-right`}>{year}</div>
       </div>
       
-      <p className="mb-6 text-gray-300">{description}</p>
+      <p className={`mb-6 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>{description}</p>
       
       {technologies && technologies.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6">
@@ -52,7 +54,9 @@ const ProjectCard = ({
           href={link} 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="inline-block mt-2 px-4 py-2 glass-morphism rounded-full transition-all duration-300 hover:bg-white/10"
+          className={`inline-block mt-2 px-4 py-2 glass-morphism rounded-full transition-all duration-300 ${
+            theme === 'light' ? 'hover:bg-black/10' : 'hover:bg-white/10'
+          }`}
         >
           View Project →
         </a>

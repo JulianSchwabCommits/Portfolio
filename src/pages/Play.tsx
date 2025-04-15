@@ -11,6 +11,7 @@ const projects = [
     technologies: ["HTML", "CSS", "JavaScript"],
     link: "https://algs.julianschwab.dev"
   },
+  /*
   {
     title: "Games Hub",
     subtitle: "Collection of Web Games",
@@ -27,12 +28,13 @@ const projects = [
     technologies: ["React", "OpenRouter API", "TailwindCSS"],
     link: "https://chat.julianschwab.dev"
   },
+  */
   {
     title: "FaceRecognition",
     subtitle: "Facial Analysis Tool",
     description: "Application for face detection and recognition using Deepface technology.",
     year: "2023",
-    technologies: ["Python", "Deepface", "Computer Vision"],
+    technologies: ["Python", "OpenCV", "Deepface"],
     link: "https://github.com/JulianSchwabCommits/FaceRecognition"
   },
   {
@@ -40,7 +42,7 @@ const projects = [
     subtitle: "Personal Showcase",
     description: "Modern, responsive portfolio website showcasing projects and professional experience.",
     year: "2024",
-    technologies: ["React", "Vite", "TailwindCSS", "Framer Motion"],
+    technologies: ["React", "Vite", "TailwindCSS"],
     link: "https://julianschwab.dev"
   }
 ];
