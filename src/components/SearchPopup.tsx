@@ -14,6 +14,79 @@ interface SearchItem {
   skills?: string[];
 }
 
+const use_device_info = () => {
+  const [is_mobile, set_is_mobile] = useState(false);
+  const [is_mac, set_is_mac] = useState(false);
+
+  useEffect(() => {
+    // Check if mobile
+    const check_mobile = () => {
+      const mobile_regex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+      return mobile_regex.test(navigator.userAgent);
+    };
+
+    // Check if Mac
+    const check_mac = () => {
+      return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    };
+
+    set_is_mobile(check_mobile());
+    set_is_mac(check_mac());
+  }, []);
+
+  return { is_mobile, is_mac };
+};
+
+const SearchButton = ({ onClick }: { onClick: () => void }) => {
+  const [is_hovering, set_is_hovering] = useState(false);
+  const { theme } = use_theme();
+  const { is_mobile, is_mac } = use_device_info();
+
+  const get_button_text = () => {
+    if (is_mobile) return "Search";
+    return is_mac ? "⌘K" : "Ctrl+K";
+  };
+
+  const get_tooltip_text = () => {
+    if (is_mobile) return "Tap to search";
+    return is_mac ? "Press ⌘K to search" : "Press Ctrl+K to search";
+  };
+
+  return (
+    <motion.div 
+      className="fixed bottom-8 right-8 z-40"
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div
+        onClick={onClick}
+        onMouseEnter={() => set_is_hovering(true)}
+        onMouseLeave={() => set_is_hovering(false)}
+        className="relative"
+      >
+        <button className={`p-4 glass-morphism rounded-full cursor-pointer hover:bg-white/10 transition-all duration-200 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+          <span className="text-sm">{get_button_text()}</span>
+        </button>
+        
+        {is_hovering && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`absolute bottom-full mb-2 right-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-md ${
+              theme === 'light' 
+                ? 'bg-gray-800 text-white' 
+                : 'bg-white text-gray-800'
+            }`}
+          >
+            {get_tooltip_text()}
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
 const SearchPopup = () => {
   const [is_open, set_is_open] = useState(false);
   const [search, set_search] = useState('');
@@ -127,81 +200,84 @@ const SearchPopup = () => {
   };
 
   return (
-    <AnimatePresence>
-      {is_open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          onClick={() => set_is_open(false)}
-        >
+    <>
+      <SearchButton onClick={() => set_is_open(true)} />
+      <AnimatePresence>
+        {is_open && (
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-lg p-4"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={() => set_is_open(false)}
           >
-            <div className="glass-morphism rounded-xl p-4">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  set_search(e.target.value);
-                  set_selected_index(0);
-                }}
-                onKeyDown={handle_keydown}
-                placeholder="Search for pages, themes, projects, or experiences..."
-                className="w-full bg-transparent text-white placeholder-[#9ca3af] outline-none"
-                autoFocus
-              />
-              
-              {filtered_results.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {filtered_results.map((result, index) => (
-                    <div
-                      key={`${result.type}-${result.id}`}
-                      className={`p-2 rounded cursor-pointer transition-colors ${
-                        index === selected_index 
-                          ? 'border border-white/20' 
-                          : 'border border-transparent'
-                      }`}
-                      onClick={() => handle_selection(result)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-white">{result.title}</span>
-                        <span className="text-xs text-[#9ca3af]">
-                          {result.type.charAt(0).toUpperCase() + result.type.slice(1)}
-                        </span>
-                      </div>
-                      {(result.description || result.skills) && (
-                        <div className="mt-1 text-xs text-[#9ca3af]">
-                          {result.description && <div>{result.description}</div>}
-                          {result.skills && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {result.skills.map(skill => (
-                                <span key={skill} className="px-1 py-0.5 bg-gray-800/50 rounded">
-                                  {skill}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-lg p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="glass-morphism rounded-xl p-4">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => {
+                    set_search(e.target.value);
+                    set_selected_index(0);
+                  }}
+                  onKeyDown={handle_keydown}
+                  placeholder="Search for pages, themes, projects, or experiences..."
+                  className="w-full bg-transparent text-white placeholder-[#9ca3af] outline-none"
+                  autoFocus
+                />
+                
+                {filtered_results.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {filtered_results.map((result, index) => (
+                      <div
+                        key={`${result.type}-${result.id}`}
+                        className={`p-2 rounded cursor-pointer transition-colors ${
+                          index === selected_index 
+                            ? 'border border-white/20' 
+                            : 'border border-transparent'
+                        }`}
+                        onClick={() => handle_selection(result)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-white">{result.title}</span>
+                          <span className="text-xs text-[#9ca3af]">
+                            {result.type.charAt(0).toUpperCase() + result.type.slice(1)}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        {(result.description || result.skills) && (
+                          <div className="mt-1 text-xs text-[#9ca3af]">
+                            {result.description && <div>{result.description}</div>}
+                            {result.skills && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {result.skills.map(skill => (
+                                  <span key={skill} className="px-1 py-0.5 bg-gray-800/50 rounded">
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="mt-2 text-sm text-[#9ca3af]">
+                  Press Enter to select, ↑↓ to navigate
                 </div>
-              )}
-              
-              <div className="mt-2 text-sm text-[#9ca3af]">
-                Press Enter to select, ↑↓ to navigate
               </div>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
