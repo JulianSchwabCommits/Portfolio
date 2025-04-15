@@ -28,7 +28,18 @@ interface Message {
 }
 
 const generate_system_prompt = (experiences: Experience[], projects: Project[]) => {
+  const birth_date = new Date('2008-05-21');
+  const today = new Date();
+  let age = today.getFullYear() - birth_date.getFullYear();
+  const month_diff = today.getMonth() - birth_date.getMonth();
+  
+  if (month_diff < 0 || (month_diff === 0 && today.getDate() < birth_date.getDate())) {
+    age--;
+  }
+
   const prompt = `You are Max, Julian's personal AI assistant. You should only answer questions about Julian and his projects and experiences.
+
+Julian's Age: ${age} years old (born on May 21, 2008)
 
 Julian's Experiences:
 ${experiences.map((exp, index) => `${index + 1}. ${exp.title} (${exp.period})
@@ -47,7 +58,8 @@ Instructions:
 3. Be friendly and professional
 4. Use your knowledge to provide detailed, accurate responses
 5. If you're not sure about something, say so rather than making assumptions
-6. Keep responses concise but informative`;
+6. Keep responses concise but informative
+7. When asked about Julian's age, use the calculated age of ${age} years`;
 
   return prompt;
 };
@@ -77,7 +89,6 @@ const Chatbot = () => {
           experiences_res.data || [],
           projects_res.data || []
         );
-        console.log('Generated System Prompt:', prompt);
         setSystemPrompt(prompt);
       } catch (error) {
         console.error('Error fetching data for system prompt:', error);
@@ -204,33 +215,27 @@ const Chatbot = () => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            handleSendMessage();
+            if (!isLoading) handleSendMessage();
           }}
-          className="flex gap-2"
+          className="flex"
         >
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
             placeholder="Ask me anything about Julian..."
-            className={`flex-1 py-2 px-4 rounded-full glass-morphism ${
+            className={`w-full py-2 px-4 rounded-full glass-morphism ${
               theme === 'light' 
                 ? 'bg-gray-100 text-gray-800 placeholder-gray-500'
                 : 'bg-white/5 text-white placeholder-gray-400'
             } focus:outline-none focus:ring-1 focus:ring-white/20`}
-            disabled={isLoading}
           />
-          <button
-            type="submit"
-            className={`p-2 rounded-full glass-morphism ${
-              theme === 'light'
-                ? 'hover:bg-gray-200'
-                : 'hover:bg-white/10'
-            } transition-colors`}
-            disabled={isLoading}
-          >
-            <Send size={20} />
-          </button>
         </form>
       </div>
     </div>
