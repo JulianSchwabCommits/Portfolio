@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { use_theme } from "../context/ThemeContext";
 
 interface ProjectCardProps {
   title: string;
@@ -17,36 +18,40 @@ const ProjectCard = ({
   demo_url,
   github_url
 }: ProjectCardProps) => {
+  const { theme } = use_theme();
+  
   return (
     <motion.div
-      className="glass-morphism rounded-3xl overflow-hidden hover-scale p-8"
+      className="glass-morphism rounded-3xl overflow-hidden hover-scale p-8 h-full flex flex-col justify-between"
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
     >
-      <div className="flex justify-between items-start mb-4">
-        <span className="text-gray-400 text-lg">{year}</span>
-        {demo_url && (
-          <a
-            href={demo_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-5 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors text-center"
-          >
-            Preview →
-          </a>
-        )}
-      </div>
+      <div className="flex-1">
+        <div className="flex justify-between items-start mb-4">
+          <span className={`text-lg ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>{year}</span>
+          {demo_url && (
+            <a
+              href={demo_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`px-5 py-2 ${theme === 'light' ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' : 'bg-white/10 hover:bg-white/20 text-white'} rounded-full transition-colors text-center`}
+            >
+              Preview →
+            </a>
+          )}
+        </div>
 
-      <h3 className="text-2xl font-bold text-white mb-4">{title}</h3>
-      <p className="text-gray-300 text-lg mb-6">{description}</p>
+        <h3 className={`text-2xl font-bold mb-4 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{title}</h3>
+        <p className={`text-lg mb-6 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>{description}</p>
+      </div>
       
       <div className="flex justify-between items-end">
         <div className="flex flex-wrap gap-2 max-w-[70%]">
           {technologies.map((tech, index) => (
             <span 
               key={index}
-              className="px-4 py-2 bg-white/10 rounded-full text-sm text-gray-300"
+              className={`px-4 py-2 ${theme === 'light' ? 'bg-gray-100 text-gray-700' : 'bg-white/10 text-gray-300'} rounded-full text-sm`}
             >
               {tech}
             </span>
@@ -58,7 +63,7 @@ const ProjectCard = ({
             href={github_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors text-center"
+            className={`px-5 py-2 ${theme === 'light' ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' : 'bg-white/10 hover:bg-white/20 text-white'} rounded-full transition-colors text-center`}
           >
             GitHub →
           </a>
