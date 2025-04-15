@@ -1,8 +1,8 @@
-
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import PageTransition from "../components/PageTransition";
 import Hero from "../components/Hero";
+import Experience from "../components/Experience";
 import WorkExperience from "../components/WorkExperience";
 
 const experienceData = [
@@ -53,33 +53,17 @@ const experienceData = [
 const Work = () => {
   return (
     <PageTransition>
-      <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
-        <Hero />
-        
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="mt-32 mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-serif text-center mb-16">Experience</h2>
-          
-          <div className="max-w-4xl mx-auto">
-            {experienceData.map((exp, index) => (
-              <WorkExperience
-                key={index}
-                title={exp.title}
-                company={exp.company}
-                period={exp.period}
-                description={exp.description}
-                technologies={exp.technologies}
-              />
-            ))}
-          </div>
-        </motion.div>
+      <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-0 pb-20">
+        <div className="pt-0">
+          <Hero />
+        </div>
+        <div className="mt-16">
+          <Experience />
+        </div>
       </div>
     </PageTransition>
   );
 };
 
 export default Work;
+  

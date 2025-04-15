@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../utils/supabase';
 import PageTransition from '../components/PageTransition';
+import { use_theme } from '../context/ThemeContext';
 
 interface Project {
   id: number;
@@ -20,6 +21,7 @@ const ProjectDetail = () => {
   const [project, set_project] = useState<Project | null>(null);
   const [loading, set_loading] = useState(true);
   const [error, set_error] = useState<string | null>(null);
+  const { theme } = use_theme();
 
   useEffect(() => {
     const fetch_project = async () => {
@@ -96,7 +98,11 @@ const ProjectDetail = () => {
                   href={project.github_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors text-lg"
+                  className={`px-6 py-3 rounded-lg transition-colors text-lg ${
+                    theme === 'light' 
+                      ? 'bg-gray-800 text-white hover:bg-gray-700' 
+                      : 'bg-white/10 hover:bg-white/20'
+                  }`}
                 >
                   View on GitHub
                 </a>
@@ -106,7 +112,11 @@ const ProjectDetail = () => {
                   href={project.demo_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors text-lg"
+                  className={`px-6 py-3 rounded-lg transition-colors text-lg ${
+                    theme === 'light' 
+                      ? 'bg-gray-800 text-white hover:bg-gray-700' 
+                      : 'bg-white/10 hover:bg-white/20'
+                  }`}
                 >
                   Live Demo
                 </a>

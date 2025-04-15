@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
 import { Mail, Phone, Github, Linkedin } from "lucide-react";
 import PageTransition from "../components/PageTransition";
@@ -36,11 +36,35 @@ const contactInfo = [
 const Contact = () => {
   const { theme } = use_theme();
   const [show_chatbot, set_show_chatbot] = useState(false);
+  const [is_mobile, set_is_mobile] = useState(false);
+
+  useEffect(() => {
+    const check_mobile = () => {
+      set_is_mobile(window.innerWidth < 768);
+    };
+    
+    check_mobile();
+    window.addEventListener('resize', check_mobile);
+    
+    return () => window.removeEventListener('resize', check_mobile);
+  }, []);
+
+  useEffect(() => {
+    if (!is_mobile) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [is_mobile]);
 
   return (
-    <div className="min-h-screen p-8">
+    <div className={`min-h-screen p-8 ${!is_mobile ? 'overflow-hidden' : ''}`}>
       <PageTransition>
-        <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
+        <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-28 pb-20">
           <motion.div 
             className="flex flex-col items-center justify-center text-center mb-16"
             initial="hidden"

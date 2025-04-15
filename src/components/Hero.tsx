@@ -19,7 +19,7 @@ const Hero = () => {
 
   return (
     <motion.div 
-      className="min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-0"
+      className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4 sm:px-0"
       initial="hidden"
       animate="visible"
       variants={{
@@ -33,7 +33,7 @@ const Hero = () => {
       }}
     >
       <motion.h1 
-        className="text-6xl md:text-8xl font-serif mb-6 text-center mx-auto"
+        className="text-6xl md:text-8xl font-serif mb-1 text-center mx-auto"
         variants={{
           hidden: { opacity: 0, y: 50 },
           visible: { 
@@ -47,7 +47,7 @@ const Hero = () => {
       </motion.h1>
       
       <motion.h2 
-        className="text-5xl md:text-7xl font-serif mb-8 text-center mx-auto"
+        className="text-5xl md:text-7xl font-serif mb-2 text-center mx-auto"
         variants={{
           hidden: { opacity: 0, y: 50 },
           visible: { 

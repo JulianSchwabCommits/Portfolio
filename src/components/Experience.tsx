@@ -41,6 +41,7 @@ const Experience = () => {
 
   return (
     <div className="space-y-8">
+      <h2 className="text-4xl md:text-5xl font-serif text-center mb-16">Experience</h2>
       {experiences.map((exp, index) => (
         <motion.div
           key={exp.id}

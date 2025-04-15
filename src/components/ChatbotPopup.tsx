@@ -201,6 +201,10 @@ Instructions:
                         ? 'bg-gray-100 text-gray-800'
                         : 'bg-white/5 text-white'
                   }`}
+                  style={{ 
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }}
                 >
                   {message.text}
                 </div>
@@ -212,17 +216,45 @@ Instructions:
         
         <div className="p-4 absolute bottom-0 left-0 right-0 z-10">
           <form onSubmit={handleSubmit} className="flex">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything about Julian..."
-              className={`flex-1 py-2 px-4 rounded-full ${
-                theme === 'light' 
-                  ? 'bg-gray-200 text-gray-800 placeholder-gray-500'
-                  : 'bg-[#27272a] text-white placeholder-gray-400'
-              } focus:outline-none focus:ring-1 focus:ring-white/20`}
-            />
+            <div className="relative flex-1">
+              <textarea
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  // Auto-resize the textarea
+                  const textarea = e.target as HTMLTextAreaElement;
+                  textarea.style.height = '40px';
+                  const newHeight = Math.min(textarea.scrollHeight, 120);
+                  textarea.style.height = `${newHeight}px`;
+                  // Update border radius based on height
+                  textarea.style.borderRadius = newHeight > 40 ? '1rem' : '9999px';
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+                    e.preventDefault();
+                    handleSendMessage(input);
+                    setInput("");
+                    // Reset height and border radius after sending
+                    const textarea = e.target as HTMLTextAreaElement;
+                    textarea.style.height = '40px';
+                    textarea.style.borderRadius = '9999px';
+                  }
+                }}
+                placeholder="Ask me anything about Julian..."
+                className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none ${
+                  theme === 'light' 
+                    ? 'bg-gray-200 text-gray-800 placeholder-gray-500'
+                    : 'bg-[#27272a] text-white placeholder-gray-400'
+                } focus:outline-none focus:ring-1 focus:ring-white/20`}
+                style={{ 
+                  whiteSpace: 'pre-wrap', 
+                  wordBreak: 'break-word',
+                  height: '40px',
+                  maxHeight: '120px',
+                  borderRadius: '9999px'
+                }}
+              />
+            </div>
           </form>
         </div>
       </motion.div>
