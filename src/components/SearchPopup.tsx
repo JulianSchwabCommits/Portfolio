@@ -119,6 +119,11 @@ const SearchPopup = () => {
                 Press Enter to select, ↑↓ to navigate
               </div>
             </div>
+            <div className="absolute inset-x-0 bottom-10 flex justify-center cursor-pointer" style={{ opacity: 1, transform: 'translateY(8.62266px)' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white opacity-80 hover:opacity-100 transition-opacity">
+                <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+              </svg>
+            </div>
           </motion.div>
         </motion.div>
       )}
