@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send } from "lucide-react";
+import { Send, Maximize2 } from "lucide-react";
 import { use_theme } from "../context/ThemeContext";
 import { supabase } from "../utils/supabase";
 
@@ -25,6 +25,10 @@ interface Message {
   id: number;
   text: string;
   sender: "user" | "bot";
+}
+
+interface ChatbotProps {
+  onExpand?: () => void;
 }
 
 const generate_system_prompt = (experiences: Experience[], projects: Project[]) => {
@@ -64,7 +68,7 @@ Instructions:
   return prompt;
 };
 
-const Chatbot = () => {
+const Chatbot = ({ onExpand }: ChatbotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, text: "Hi! I'm Max, Julian's AI assistant. How can I help you learn more about Julian?", sender: "bot" }
   ]);
@@ -178,8 +182,24 @@ const Chatbot = () => {
   };
 
   return (
-    <div className={`glass-morphism rounded-2xl overflow-hidden flex flex-col h-[500px] max-w-2xl w-full mx-auto ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-      <div className="flex-1 p-4 overflow-y-auto scrollbar-none">
+    <motion.div 
+      className={`glass-morphism rounded-2xl overflow-hidden flex flex-col h-[400px] ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="flex justify-end items-center p-4 relative z-10">
+        {onExpand && (
+          <motion.button
+            onClick={onExpand}
+            className="p-2 rounded-full hover:bg-white/10 transition-colors absolute top-2 right-2"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Maximize2 className={`w-5 h-5 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`} />
+          </motion.button>
+        )}
+      </div>
+      <div className="flex-1 p-4 overflow-y-auto scrollbar-none -mt-8 pb-16">
         <AnimatePresence>
           {messages.map((message) => (
             <motion.div
@@ -211,7 +231,7 @@ const Chatbot = () => {
         <div ref={messagesEndRef} />
       </div>
       
-      <div className={`border-t ${theme === 'light' ? 'border-gray-200' : 'border-white/10'} p-4`}>
+      <div className="p-4 absolute bottom-0 left-0 right-0 z-10">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -230,15 +250,15 @@ const Chatbot = () => {
               }
             }}
             placeholder="Ask me anything about Julian..."
-            className={`w-full py-2 px-4 rounded-full glass-morphism ${
+            className={`flex-1 py-2 px-4 rounded-full ${
               theme === 'light' 
-                ? 'bg-gray-100 text-gray-800 placeholder-gray-500'
-                : 'bg-white/5 text-white placeholder-gray-400'
+                ? 'bg-gray-200 text-gray-800 placeholder-gray-500'
+                : 'bg-[#27272a] text-white placeholder-gray-400'
             } focus:outline-none focus:ring-1 focus:ring-white/20`}
           />
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

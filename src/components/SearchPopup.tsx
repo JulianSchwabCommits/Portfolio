@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { use_theme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
+import { Send } from 'lucide-react';
+import ChatbotPopup from './ChatbotPopup';
 
 interface SearchItem {
   id: number;
@@ -12,6 +14,12 @@ interface SearchItem {
   period?: string;
   description?: string;
   skills?: string[];
+}
+
+interface Message {
+  id: number;
+  text: string;
+  sender: "user" | "bot";
 }
 
 const use_device_info = () => {
@@ -93,6 +101,7 @@ const SearchPopup = () => {
   const [selected_index, set_selected_index] = useState(0);
   const [projects, set_projects] = useState<SearchItem[]>([]);
   const [experiences, set_experiences] = useState<SearchItem[]>([]);
+  const [show_chatbot, set_show_chatbot] = useState(false);
   const { set_theme } = use_theme();
   const navigate = useNavigate();
 
@@ -166,6 +175,7 @@ const SearchPopup = () => {
       if (e.key === 'Escape') {
         set_is_open(false);
         set_search('');
+        set_show_chatbot(false);
       }
     };
 
@@ -184,6 +194,9 @@ const SearchPopup = () => {
       e.preventDefault();
       const selected_item = filtered_results[selected_index];
       handle_selection(selected_item);
+    } else if (e.key === 'Enter' && filtered_results.length === 0 && search.trim()) {
+      e.preventDefault();
+      set_show_chatbot(true);
     }
   };
 
@@ -209,7 +222,10 @@ const SearchPopup = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-            onClick={() => set_is_open(false)}
+            onClick={() => {
+              set_is_open(false);
+              set_show_chatbot(false);
+            }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -232,7 +248,7 @@ const SearchPopup = () => {
                   autoFocus
                 />
                 
-                {filtered_results.length > 0 && (
+                {filtered_results.length > 0 ? (
                   <div className="mt-2 space-y-1">
                     {filtered_results.map((result, index) => (
                       <div
@@ -267,7 +283,17 @@ const SearchPopup = () => {
                       </div>
                     ))}
                   </div>
-                )}
+                ) : search.trim() ? (
+                  <div className="mt-2 p-4 text-center">
+                    <p className="text-white mb-2">No results found</p>
+                    <button 
+                      onClick={() => set_show_chatbot(true)}
+                      className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors"
+                    >
+                      Ask AI about "{search}"
+                    </button>
+                  </div>
+                ) : null}
                 
                 <div className="mt-2 text-sm text-[#9ca3af]">
                   Press Enter to select, ↑↓ to navigate
@@ -275,6 +301,16 @@ const SearchPopup = () => {
               </div>
             </motion.div>
           </motion.div>
+        )}
+        {show_chatbot && (
+          <ChatbotPopup 
+            initialMessage={search}
+            onClose={() => {
+              set_show_chatbot(false);
+              set_is_open(false);
+              set_search('');
+            }} 
+          />
         )}
       </AnimatePresence>
     </>
