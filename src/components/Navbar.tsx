@@ -20,12 +20,12 @@ const Navbar = () => {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="fixed top-0 left-0 right-0 z-50 flex justify-center py-6 px-4"
     >
-      <div className="glass-morphism flex items-center justify-center gap-4 rounded-full px-[6px] py-[6px]">
+      <div className="glass-morphism flex items-center justify-center gap-1 sm:gap-4 rounded-full px-[6px] py-[6px]">
         {navItems.map(item => (
           <Link 
             key={item.name} 
             to={item.path} 
-            className="relative px-4 py-2"
+            className="relative px-2 sm:px-4 py-2 text-sm sm:text-base"
           >
             <span className="relative z-10 font-medium">
               {item.name}

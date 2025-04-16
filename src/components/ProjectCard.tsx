@@ -54,8 +54,8 @@ const ProjectCard = ({
         <p className={`text-lg mb-6 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>{description}</p>
       </div>
       
-      <div className="flex justify-between items-end">
-        <div className="flex flex-wrap gap-2 max-w-[70%]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-4">
+        <div className="flex flex-wrap gap-2 max-w-full sm:max-w-[70%]">
           {technologies.map((tech, index) => (
             <span 
               key={index}
@@ -71,7 +71,7 @@ const ProjectCard = ({
             href={github_url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`px-5 py-2 ${theme === 'light' ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' : 'bg-white/10 hover:bg-white/20 text-white'} rounded-full transition-colors text-center`}
+            className={`px-5 py-2 mt-1 sm:mt-0 ${theme === 'light' ? 'bg-gray-100 hover:bg-gray-200 text-gray-800' : 'bg-white/10 hover:bg-white/20 text-white'} rounded-full transition-colors text-center shrink-0`}
           >
             GitHub →
           </a>

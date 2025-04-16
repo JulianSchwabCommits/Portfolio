@@ -22,13 +22,13 @@ const contactInfo = [
   {
     icon: <Github className="w-5 h-5" />,
     label: "GitHub",
-    value: "github.com/JulianSchwabCommits",
+    value: "JulianSchwabCommits",
     href: "https://github.com/JulianSchwabCommits"
   },
   {
     icon: <Linkedin className="w-5 h-5" />,
     label: "LinkedIn",
-    value: "linkedin.com/in/julian-schwab",
+    value: "julian-schwab",
     href: "https://www.linkedin.com/in/julian-schwab-680349263"
   }
 ];
