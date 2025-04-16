@@ -10,6 +10,9 @@ interface ProjectCardProps {
   github_url: string | null;
 }
 
+
+// ProjectCard component to display project details
+
 const ProjectCard = ({
   title,
   description,
