@@ -188,6 +188,10 @@ const SearchPopup = () => {
         set_is_open(true);
         set_search('');
       }
+      if (e.ctrlKey && e.key === 'i') {
+        e.preventDefault();
+        set_show_chatbot(true);
+      }
       if (e.key === 'Escape') {
         set_is_open(false);
         set_search('');
