@@ -22,10 +22,15 @@ const ProjectCard = ({
   
   return (
     <motion.div
-      className="glass-morphism rounded-3xl overflow-hidden hover-scale p-8 h-full flex flex-col justify-between"
+      className="glass-morphism rounded-3xl overflow-hidden p-8 h-full flex flex-col justify-between transition-all duration-300 hover:bg-white/10 hover:shadow-lg hover:-translate-y-1"
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
+      whileHover={{ 
+        scale: 1.05,
+        transition: { duration: 0.2 }
+      }}
+      whileTap={{ scale: 0.98 }}
     >
       <div className="flex-1">
         <div className="flex justify-between items-start mb-4">

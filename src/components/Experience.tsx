@@ -41,14 +41,18 @@ const Experience = () => {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-4xl md:text-5xl font-serif text-center mb-16">Experience</h2>
-      {experiences.map((exp, index) => (
+      <h2 className="text-4xl md:text-5xl font-serif text-center mb-16">Experience</h2>      {experiences.map((exp, index) => (
         <motion.div
           key={exp.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 }}
-          className="glass-morphism p-6 rounded-xl"
+          className="glass-morphism p-6 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-lg hover:-translate-y-1"
+          whileHover={{ 
+            scale: 1.05,
+            transition: { duration: 0.2 }
+          }}
+          whileTap={{ scale: 0.98 }}
         >
           <h3 className="text-xl font-bold mb-2">{exp.title}</h3>
           <p className="text-gray-400 mb-2">{exp.company}</p>

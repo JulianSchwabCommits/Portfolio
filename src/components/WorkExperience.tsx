@@ -24,7 +24,12 @@ const WorkExperience = ({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.5 }}
-      className="glass-morphism p-6 md:p-8 rounded-2xl mb-6 hover-scale"
+      className="glass-morphism p-6 md:p-8 rounded-2xl mb-6 transition-all duration-300 hover:bg-white/10 hover:shadow-lg hover:-translate-y-1"
+      whileHover={{ 
+        scale: 1.05,
+        transition: { duration: 0.2 }
+      }}
+      whileTap={{ scale: 0.98 }}
     >
       <div className="flex flex-col md:flex-row md:justify-between mb-4">
         <div>
