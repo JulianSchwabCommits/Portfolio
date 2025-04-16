@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { use_theme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import { Send } from 'lucide-react';
+import { Send, Sun, Moon } from 'lucide-react';
 import ChatbotPopup from './ChatbotPopup';
 
 interface SearchItem {
@@ -43,6 +43,24 @@ const use_device_info = () => {
   }, []);
 
   return { is_mobile, is_mac };
+};
+const ThemeToggle = () => {
+  const { theme, toggle_theme } = use_theme();
+  
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        toggle_theme();
+      }}
+      className="absolute bottom-2 right-3 p-2 rounded-full hover:bg-white/10 transition-all duration-200 cursor-pointer"
+    >
+      {theme === 'light' ? 
+        <Moon className="w-5 h-5 text-white" /> : 
+        <Sun className="w-5 h-5" />
+      }
+    </div>
+  );
 };
 
 const SearchButton = ({ onClick }: { onClick: () => void }) => {
@@ -142,8 +160,6 @@ const SearchPopup = () => {
   }, [is_open]);
 
   const static_results: SearchItem[] = [
-    { id: 0, title: 'Dark Mode', type: 'theme' },
-    { id: 1, title: 'Light Mode', type: 'theme' },
     { id: 2, title: 'Work', type: 'route' },
     { id: 3, title: 'About', type: 'route' },
     { id: 4, title: 'Play', type: 'route' },
@@ -247,6 +263,11 @@ const SearchPopup = () => {
                   className="w-full bg-transparent text-white placeholder-[#9ca3af] outline-none"
                   autoFocus
                 />
+                
+                {/* Theme Toggle */}
+                <div className="mt-2 border-t border-white/10 pt-2">
+                  <ThemeToggle />
+                </div>
                 
                 {filtered_results.length > 0 ? (
                   <div className="mt-2 space-y-1">
