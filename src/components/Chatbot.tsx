@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Maximize2 } from "lucide-react";
 import { use_theme } from "../context/ThemeContext";
 import { supabase } from "../utils/supabase";
+import { createChatConversation, saveChatMessage } from "../lib/chat_storage";
 
 interface Experience {
   id: number;
@@ -75,6 +76,7 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState("");
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { theme } = use_theme();
 
@@ -94,6 +96,18 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
           projects_res.data || []
         );
         setSystemPrompt(prompt);
+        
+        // Create a new conversation for this chat session
+        const newConversationId = await createChatConversation();
+        setConversationId(newConversationId);
+        
+        // Save the welcome message
+        if (newConversationId) {
+          await saveChatMessage(newConversationId, {
+            text: messages[0].text,
+            sender: messages[0].sender
+          });
+        }
       } catch (error) {
         console.error('Error fetching data for system prompt:', error);
       }
@@ -122,6 +136,14 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    
+    // Save user message to database
+    if (conversationId) {
+      await saveChatMessage(conversationId, {
+        text: userMessage.text,
+        sender: userMessage.sender
+      });
+    }
     
     try {
       const api_key = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -168,6 +190,14 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
       };
       
       setMessages(prev => [...prev, botMessage]);
+      
+      // Save bot message to database
+      if (conversationId) {
+        await saveChatMessage(conversationId, {
+          text: botMessage.text,
+          sender: botMessage.sender
+        });
+      }
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage = {
@@ -176,6 +206,14 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
         sender: "bot" as const
       };
       setMessages(prev => [...prev, errorMessage]);
+      
+      // Save error message to database
+      if (conversationId) {
+        await saveChatMessage(conversationId, {
+          text: errorMessage.text,
+          sender: errorMessage.sender
+        });
+      }
     } finally {
       setIsLoading(false);
     }

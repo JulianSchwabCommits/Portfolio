@@ -15,6 +15,8 @@ import SearchPopup from "./components/SearchPopup";
 import { ThemeProvider } from "./context/ThemeContext";
 import ProjectDetail from "./pages/ProjectDetail";
 import ExperienceDetail from './pages/ExperienceDetail';
+import Admin from './pages/Admin';
+import AnalyticsMiddleware from './components/AnalyticsMiddleware';
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,7 @@ const AnimatedRoutes = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/experiences/:id" element={<ExperienceDetail />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
@@ -47,6 +50,7 @@ const App = () => (
             <CursorShadow />
             <Navbar />
             <SearchPopup />
+            <AnalyticsMiddleware />
             <AnimatedRoutes />
           </div>
         </BrowserRouter>
