@@ -133,16 +133,16 @@ export default function Login() {
         }}
       />
 
-      <div className="w-full max-w-md px-8 py-10 relative z-10">
-        <div className="text-center mb-8">
+      <div className="w-full max-w-md px-4 sm:px-8 py-6 sm:py-10 relative z-10">
+        <div className="text-center mb-6 sm:mb-8">
           <motion.div
-            className="w-24 h-1 bg-gradient-to-r from-gray-400 to-gray-600 dark:from-white/70 dark:to-white mx-auto mb-6 rounded-full"
+            className="w-16 sm:w-24 h-1 bg-gradient-to-r from-gray-400 to-gray-600 dark:from-white/70 dark:to-white mx-auto mb-4 sm:mb-6 rounded-full"
             initial={{ width: 0 }}
-            animate={{ width: '6rem' }}
+            animate={{ width: theme === 'light' ? '4rem' : '6rem' }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
           <motion.h1 
-            className="text-4xl font-bold text-gradient mb-3"
+            className="text-3xl sm:text-4xl font-bold text-gradient mb-2 sm:mb-3"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
@@ -150,7 +150,7 @@ export default function Login() {
             Admin Portal
           </motion.h1>
           <motion.p 
-            className="text-muted-foreground"
+            className="text-sm sm:text-base text-muted-foreground"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -166,19 +166,19 @@ export default function Login() {
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
         >
           <Card 
-            className="glass-morphism overflow-hidden"
+            className="glass-morphism overflow-hidden w-full"
           >
             <CardHeader 
-              className="pb-6 pt-6 border-b border-border"
+              className="pb-4 pt-4 sm:pb-6 sm:pt-6 border-b border-border"
             >
-              <CardTitle className="text-center text-xl">Sign In</CardTitle>
+              <CardTitle className="text-center text-lg sm:text-xl">Sign In</CardTitle>
             </CardHeader>
             <CardContent 
-              className="pt-4 pb-6 px-6"
+              className="pt-4 pb-4 px-4 sm:pb-6 sm:px-6"
             >
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div className="space-y-2">
-                  <label htmlFor="password" className="text-sm font-medium block text-foreground">Password</label>
+              <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
+                <div className="space-y-1 sm:space-y-2">
+                  <label htmlFor="password" className="text-xs sm:text-sm font-medium block text-foreground">Password</label>
                   <div className="relative">
                     <motion.div
                       whileHover={{ scale: 1.02 }}
@@ -190,7 +190,7 @@ export default function Login() {
                         placeholder="Enter your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-2 bg-card/40 border border-border rounded-lg focus:ring-2 focus:ring-ring/30 focus:border-transparent transition-all duration-300 neo-blur"
+                        className="w-full px-3 sm:px-4 py-2 bg-card/40 border border-border rounded-lg focus:ring-2 focus:ring-ring/30 focus:border-transparent transition-all duration-300 neo-blur text-sm sm:text-base"
                         autoFocus
                       />
                     </motion.div>
@@ -205,7 +205,7 @@ export default function Login() {
                           ease: "easeInOut"
                         }}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                       </motion.div>
@@ -214,7 +214,7 @@ export default function Login() {
                 </div>
                 {error && (
                   <motion.div 
-                    className="bg-destructive/10 backdrop-blur-sm text-destructive text-sm p-3 rounded-lg border border-destructive/20"
+                    className="bg-destructive/10 backdrop-blur-sm text-destructive text-xs sm:text-sm p-2 sm:p-3 rounded-lg border border-destructive/20"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
@@ -230,12 +230,12 @@ export default function Login() {
                 >
                   <Button 
                     type="submit" 
-                    className="w-full bg-white text-black border border-black dark:text-white dark:border-white dark:bg-transparent hover:bg-card/40 hover:text-foreground dark:hover:bg-card/40 py-2 rounded-lg transition-all duration-300 mt-6"
+                    className="w-full bg-white text-black border border-black dark:text-white dark:border-white dark:bg-transparent hover:bg-card/40 hover:text-foreground dark:hover:bg-card/40 py-1.5 sm:py-2 rounded-lg transition-all duration-300 mt-4 sm:mt-6 text-sm sm:text-base"
                     disabled={loading}
                   >
                     {loading ? (
                       <div className="flex items-center justify-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg className="animate-spin -ml-1 mr-2 h-3 w-3 sm:h-4 sm:w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -250,7 +250,7 @@ export default function Login() {
         </motion.div>
         
         <motion.div 
-          className="text-center mt-6 text-muted-foreground text-xs neo-blur py-2 px-4 rounded-full inline-block mx-auto"
+          className="text-center mt-4 sm:mt-6 text-muted-foreground text-[10px] sm:text-xs neo-blur py-1.5 sm:py-2 px-3 sm:px-4 rounded-full inline-block mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}

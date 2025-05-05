@@ -59,7 +59,7 @@ export const saveChatMessage = async (
 };
 
 // Save a full conversation history
-export const saveConversationHistory = async (messages: Message[]): Promise<boolean> => {
+export const saveConversationHistory = async (messages: Message[], skipInitialMessage: boolean = true): Promise<boolean> => {
   if (messages.length === 0) return false;
   
   try {
@@ -67,8 +67,12 @@ export const saveConversationHistory = async (messages: Message[]): Promise<bool
     const conversationId = await createChatConversation();
     if (!conversationId) return false;
     
-    // Save all messages
-    const messagePromises = messages.map(msg => 
+    // Save all messages, optionally skipping the first welcome message
+    const messagesToSave = skipInitialMessage && messages[0].sender === 'bot' 
+      ? messages.slice(1) 
+      : messages;
+    
+    const messagePromises = messagesToSave.map(msg => 
       saveChatMessage(conversationId, {
         text: msg.text,
         sender: msg.sender
@@ -87,7 +91,10 @@ export const saveConversationHistory = async (messages: Message[]): Promise<bool
 const getVisitorIP = async (): Promise<string> => {
   try {
     const response = await fetch('https://api.ipify.org?format=json');
-    const data = await response.json();
+    interface IpResponse {
+      ip: string;
+    }
+    const data = await response.json() as IpResponse;
     return data.ip;
   } catch (error) {
     console.error('Error getting IP:', error);

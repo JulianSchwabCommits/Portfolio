@@ -106,16 +106,8 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
         
         setConversationId(newConversationId);
         
-        // Save the welcome message
-        const welcomeMessage = messages[0];
-        const saved = await saveChatMessage(newConversationId, {
-          text: welcomeMessage.text,
-          sender: welcomeMessage.sender
-        });
-        
-        if (!saved) {
-          console.error('Failed to save welcome message');
-        }
+        // Don't save the welcome message - it will only be displayed to the user
+        // but not stored in the database
       } catch (error) {
         console.error('Error fetching data for system prompt:', error);
       }

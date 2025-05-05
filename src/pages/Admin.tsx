@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Trash2, Edit, Plus, Database, MessageSquare, Search, ChevronRight, ChevronDown, Table2, BarChart3, PieChart, LineChart } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -95,24 +95,21 @@ export default function Admin() {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    // Handle redirect inside useEffect to fix React Router warning
+    if (!isAuthenticated && sessionStorage.getItem('admin_auth') === null) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
   const checkAuth = async () => {
-    // Check if we have a session storage item for admin auth
     const adminAuth = sessionStorage.getItem('admin_auth');
     if (adminAuth) {
       setIsAuthenticated(true);
       
-      // Setup database functions before fetching data
-      try {
-        await setupDatabaseFunctions();
-      } catch (e) {
-        console.error('Error setting up database functions:', e);
-      }
-      
       fetchAnalyticsData('week'); // Default to week view
       fetchTables();
       fetchChatConversations();
-    } else {
-      navigate('/login');
     }
   };
 
@@ -133,10 +130,25 @@ export default function Admin() {
       ]);
 
       if (viewsResult.data) {
-        setPageViews(viewsResult.data as PageView[]);
+        setPageViews(viewsResult.data.map(view => ({
+          id: String(view.id || ''),
+          page_path: String(view.page_path || ''),
+          viewed_at: String(view.viewed_at || ''),
+          visitor_ip: String(view.visitor_ip || ''),
+          referrer: view.referrer ? String(view.referrer) : undefined,
+          user_agent: view.user_agent ? String(view.user_agent) : undefined
+        })));
       }
       if (interactionsResult.data) {
-        setInteractions(interactionsResult.data as UserInteraction[]);
+        setInteractions(interactionsResult.data.map(interaction => ({
+          id: String(interaction.id || ''),
+          interaction_type: String(interaction.interaction_type || ''),
+          element_id: String(interaction.element_id || ''),
+          page_path: String(interaction.page_path || ''),
+          created_at: String(interaction.created_at || ''),
+          visitor_ip: interaction.visitor_ip ? String(interaction.visitor_ip) : undefined,
+          user_agent: interaction.user_agent ? String(interaction.user_agent) : undefined
+        })));
       }
     } catch (err) {
       console.error('Error fetching analytics data:', err);
@@ -147,17 +159,20 @@ export default function Admin() {
 
   const fetchTables = async () => {
     try {
-      // First attempt: try the RPC function if it exists
-      const { data: rpcData, error: rpcError } = await supabase.rpc('get_tables');
+      // First attempt: try to get tables directly using row level security bypassing
+      const { data: tablesData, error } = await supabase
+        .from('pg_catalog_tables')  // This is a view we'll create instead of pg_tables
+        .select('tablename')
+        .eq('schemaname', 'public');
       
-      if (!rpcError && rpcData) {
+      if (!error && tablesData && Array.isArray(tablesData)) {
         // Format and sort tables
-        const sortedTables = rpcData
-          .map((t: any) => ({ 
-            name: t.table_name || t.tablename, 
+        const sortedTables = tablesData
+          .map(t => ({ 
+            name: typeof t.tablename === 'string' ? t.tablename : String(t.tablename || ''), 
             schema: 'public' 
-          }))
-          .sort((a: Table, b: Table) => a.name.localeCompare(b.name));
+          }) as Table)
+          .sort((a, b) => a.name.localeCompare(b.name));
         
         setTables(sortedTables);
         
@@ -168,7 +183,7 @@ export default function Admin() {
         return;
       }
       
-      console.log('RPC method failed, trying fallback...');
+      console.log('Direct tables query failed, trying fallback...');
       
       // Fallback: Try with known tables
       const knownTables = ['page_views', 'user_interactions', 'chat_conversations', 'chat_messages', 'admin_users'];
@@ -326,7 +341,13 @@ export default function Admin() {
       if (error) throw error;
       
       if (data) {
-        setConversationMessages(data as ChatMessage[]);
+        setConversationMessages(data.map(msg => ({
+          id: String(msg.id || ''),
+          conversation_id: String(msg.conversation_id || ''),
+          content: String(msg.content || ''),
+          sender: (msg.sender === 'user' || msg.sender === 'bot') ? msg.sender : 'user',
+          created_at: String(msg.created_at || '')
+        })));
       }
     } catch (err) {
       console.error(`Error fetching messages for conversation ${conversationId}:`, err);
@@ -502,7 +523,6 @@ export default function Admin() {
       setCurrentTable('');
       setTableData([]);
       setEditingItem(null);
-      setError('');
       setChatConversations([]);
       setCurrentConversation('');
       setConversationMessages([]);
@@ -524,197 +544,59 @@ export default function Admin() {
   // Function to directly execute SQL in Supabase for admin use
   const executeSQL = async (sql: string) => {
     try {
-      const { data, error } = await supabase.rpc('exec_sql', { sql });
-      
-      if (error) {
-        console.error('SQL execution error:', error);
-        return null;
+      // Since exec_sql function is not available, use direct table queries instead
+      // This is a fallback approach that handles basic SELECT queries
+      if (sql.trim().toUpperCase().startsWith('SELECT')) {
+        // Extract table name (very simple parser, will only work for basic queries)
+        const tableMatch = sql.match(/FROM\s+"?([a-zA-Z0-9_]+)"?/i);
+        const tableName = tableMatch ? tableMatch[1] : null;
+        
+        if (tableName) {
+          const { data, error } = await supabase.from(tableName).select('*').limit(100);
+          
+          if (error) {
+            console.error('SQL execution error:', error);
+            return JSON.stringify({ error: error.message });
+          }
+          
+          return JSON.stringify(data);
+        }
       }
       
-      return data;
+      // For non-SELECT queries, show a message that this isn't supported
+      return JSON.stringify({ message: "Only basic SELECT queries are supported in this interface" });
     } catch (err) {
       console.error('Error executing SQL:', err);
-      return null;
+      return JSON.stringify({ error: 'Failed to execute query' });
     }
-  };
-  
-  // Function to execute raw SQL for creating required functions
-  const setupDatabaseFunctions = async () => {
-    try {
-      // Create exec_sql function if it doesn't exist
-      await executeSQL(`
-        CREATE OR REPLACE FUNCTION exec_sql(sql text)
-        RETURNS text
-        LANGUAGE plpgsql
-        SECURITY DEFINER
-        AS $$
-        BEGIN
-          EXECUTE sql;
-          RETURN 'SQL executed successfully';
-        EXCEPTION WHEN OTHERS THEN
-          RETURN 'Error: ' || SQLERRM;
-        END;
-        $$;
-      `);
-      
-      // Create get_tables function
-      await executeSQL(`
-        CREATE OR REPLACE FUNCTION get_tables()
-        RETURNS TABLE (table_name text)
-        LANGUAGE plpgsql
-        AS $$
-        BEGIN
-          RETURN QUERY
-          SELECT tablename::text
-          FROM pg_catalog.pg_tables
-          WHERE schemaname = 'public'
-          ORDER BY tablename;
-        END;
-        $$;
-      `);
-      
-      // Create get_table_columns function
-      await executeSQL(`
-        CREATE OR REPLACE FUNCTION get_table_columns(p_table_name text)
-        RETURNS TABLE (
-          name text,
-          type text,
-          is_nullable boolean,
-          is_primary_key boolean
-        )
-        LANGUAGE plpgsql
-        AS $$
-        BEGIN
-          RETURN QUERY
-          SELECT
-            c.column_name::text AS name,
-            c.data_type::text AS type,
-            c.is_nullable = 'YES' AS is_nullable,
-            CASE WHEN pk.constraint_name IS NOT NULL THEN true ELSE false END AS is_primary_key
-          FROM
-            information_schema.columns c
-          LEFT JOIN (
-            SELECT
-              kcu.column_name,
-              tc.constraint_name
-            FROM
-              information_schema.table_constraints tc
-            JOIN
-              information_schema.key_column_usage kcu
-            ON
-              tc.constraint_name = kcu.constraint_name AND
-              tc.table_schema = kcu.table_schema
-            WHERE
-              tc.table_name = p_table_name AND
-              tc.constraint_type = 'PRIMARY KEY' AND
-              tc.table_schema = 'public'
-          ) pk ON c.column_name = pk.column_name
-          WHERE
-            c.table_name = p_table_name AND
-            c.table_schema = 'public'
-          ORDER BY
-            c.ordinal_position;
-        END;
-        $$;
-      `);
-      
-      console.log('Database functions created successfully');
-      return true;
-    } catch (err) {
-      console.error('Error setting up database functions:', err);
-      return false;
-    }
-  };
-
-  // Add button for manually setup database functions if needed
-  const renderSetupButton = () => {
-    return (
-      <Button 
-        onClick={async () => {
-          setLoading(true);
-          try {
-            await setupDatabaseFunctions();
-            toast({
-              title: 'Success',
-              description: 'Database functions created. Refreshing data...',
-            });
-            await fetchTables();
-          } catch (err) {
-            console.error('Setup error:', err);
-            toast({
-              title: 'Error',
-              description: 'Failed to setup database functions',
-              variant: 'destructive',
-            });
-          } finally {
-            setLoading(false);
-          }
-        }}
-        disabled={loading}
-      >
-        {loading ? 'Setting up...' : 'Setup Database Functions'}
-      </Button>
-    );
   };
 
   // Direct SQL approach to get table schema
   const fetchTableSchemaDirect = async (tableName: string) => {
     setLoading(true);
     try {
-      // Execute raw SQL to get column information
-      const sql = `
-        SELECT 
-          c.column_name as name,
-          c.data_type as type,
-          c.is_nullable = 'YES' as is_nullable,
-          CASE 
-            WHEN pk.constraint_name IS NOT NULL THEN true 
-            ELSE false 
-          END as is_primary_key
-        FROM 
-          information_schema.columns c
-        LEFT JOIN (
-          SELECT 
-            kcu.column_name, 
-            tc.constraint_name
-          FROM 
-            information_schema.table_constraints tc
-          JOIN 
-            information_schema.key_column_usage kcu
-          ON 
-            tc.constraint_name = kcu.constraint_name AND
-            tc.table_schema = kcu.table_schema
-          WHERE 
-            tc.table_name = '${tableName}' AND
-            tc.constraint_type = 'PRIMARY KEY' AND
-            tc.table_schema = 'public'
-        ) pk ON c.column_name = pk.column_name
-        WHERE 
-          c.table_name = '${tableName}' AND
-          c.table_schema = 'public'
-        ORDER BY 
-          c.ordinal_position;
-      `;
+      // Instead of using raw SQL, use the information_schema tables directly
+      const { data, error } = await supabase
+        .from('information_schema.columns')
+        .select('column_name, data_type, is_nullable, column_default')
+        .eq('table_name', tableName)
+        .eq('table_schema', 'public');
       
-      const result = await executeSQL(sql);
-      
-      if (result && result.includes('Error')) {
-        console.error('SQL error:', result);
-        // Fall back to inferring from data
+      if (error) {
+        console.error('Schema query error:', error);
         await inferSchemaFromData(tableName);
+      } else if (data && Array.isArray(data)) {
+        // Format the column data
+        const columns: Column[] = data.map(col => ({
+          name: typeof col.column_name === 'string' ? col.column_name : String(col.column_name || ''),
+          type: typeof col.data_type === 'string' ? col.data_type : String(col.data_type || ''),
+          is_nullable: col.is_nullable === 'YES',
+          is_primary_key: typeof col.column_default === 'string' && col.column_default.includes('nextval')
+        }));
+        
+        setTableColumns(columns);
       } else {
-        // Try to parse the result as JSON if it contains valid data
-        try {
-          const parsedData = JSON.parse(result);
-          if (Array.isArray(parsedData)) {
-            setTableColumns(parsedData as Column[]);
-          } else {
-            await inferSchemaFromData(tableName);
-          }
-        } catch (parseErr) {
-          console.log('Parsing SQL result failed, falling back');
-          await inferSchemaFromData(tableName);
-        }
+        await inferSchemaFromData(tableName);
       }
     } catch (err) {
       console.error('Error in direct schema query:', err);
@@ -773,6 +655,9 @@ export default function Admin() {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Execute SQL Query</DialogTitle>
+            <DialogDescription>
+              Enter a SQL query to execute. Only SELECT queries are supported in this interface.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-1 gap-2">
@@ -828,6 +713,7 @@ export default function Admin() {
       .slice(0, 5); // Top 5 pages
   };
   
+  // Get views by day for unique visitors
   const getViewsByDay = () => {
     const today = new Date();
     const startDate = new Date();
@@ -844,10 +730,13 @@ export default function Admin() {
     // Initialize the data with 0 views for each date
     const viewsByDay = dates.map(date => ({
       date: date.toISOString().split('T')[0],
-      views: 0
+      visitors: 0
     }));
     
-    // Count views for each date
+    // Create a map to track visitors per day
+    const visitorsByDate = new Map();
+    
+    // Count unique visitors for each date
     pageViews.forEach(view => {
       const viewDate = new Date(view.viewed_at);
       viewDate.setHours(0, 0, 0, 0);
@@ -856,7 +745,14 @@ export default function Admin() {
       const dataPoint = viewsByDay.find(d => d.date === dateStr);
       
       if (dataPoint) {
-        dataPoint.views++;
+        // Get or initialize the set of visitor IPs for this date
+        const visitors = visitorsByDate.get(dateStr) || new Set();
+        // Add this visitor IP to the set
+        visitors.add(view.visitor_ip);
+        // Update the visitors count for this date
+        dataPoint.visitors = visitors.size;
+        // Store updated set back in the map
+        visitorsByDate.set(dateStr, visitors);
       }
     });
     
@@ -876,6 +772,7 @@ export default function Admin() {
       .sort((a, b) => b.value - a.value);
   };
   
+  // Get device types for unique visitors only
   const getDeviceTypes = () => {
     const deviceGroups: Record<string, number> = {
       'Mobile': 0,
@@ -900,47 +797,21 @@ export default function Admin() {
       }
     };
     
+    // Get unique visitors by IP
+    const uniqueVisitors = new Map();
+    
     pageViews.forEach(view => {
-      const deviceType = detectDevice(view.user_agent);
-      deviceGroups[deviceType] = (deviceGroups[deviceType] || 0) + 1;
+      // Only count each visitor once
+      if (!uniqueVisitors.has(view.visitor_ip)) {
+        const deviceType = detectDevice(view.user_agent);
+        deviceGroups[deviceType] = (deviceGroups[deviceType] || 0) + 1;
+        uniqueVisitors.set(view.visitor_ip, deviceType);
+      }
     });
     
     return Object.entries(deviceGroups)
       .map(([name, value]) => ({ name, value }))
       .filter(item => item.value > 0);
-  };
-
-  // Analytics helper to get activity by hour and day
-  const getActivityHeatmap = () => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const heatmapData = [];
-    
-    // Initialize data structure with zeros
-    for (let day = 0; day < 7; day++) {
-      for (let hour = 0; hour < 24; hour++) {
-        heatmapData.push({
-          day: days[day],
-          hour: hour,
-          value: 0,
-          dayIndex: day // For sorting
-        });
-      }
-    }
-    
-    // Populate with page views
-    pageViews.forEach(view => {
-      const date = new Date(view.viewed_at);
-      const day = date.getDay(); // 0-6, 0 is Sunday
-      const hour = date.getHours(); // 0-23
-      
-      const dataPoint = heatmapData.find(d => d.dayIndex === day && d.hour === hour);
-      if (dataPoint) {
-        dataPoint.value++;
-      }
-    });
-    
-    // Sort by day of week 
-    return heatmapData.sort((a, b) => a.dayIndex - b.dayIndex || a.hour - b.hour);
   };
 
   const fetchAnalyticsData = async (range: string = 'week') => {
@@ -1022,25 +893,24 @@ export default function Admin() {
   };
 
   if (!isAuthenticated) {
-    // Redirect to login page
-    navigate('/login');
+    // Don't navigate here, use the useEffect hook above
     return null;
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+    <div className="container mx-auto p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-4 sm:gap-0">
+        <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
       </div>
       
       <Tabs defaultValue="analytics">
-        <div className="flex justify-between items-center mb-4">
-          <TabsList>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="page-views">Page Views</TabsTrigger>
-            <TabsTrigger value="interactions">User Interactions</TabsTrigger>
-            <TabsTrigger value="database">Database</TabsTrigger>
-            <TabsTrigger value="chat-history">Chat History</TabsTrigger>
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4 sm:gap-0">
+          <TabsList className="flex flex-wrap justify-center w-full sm:w-auto">
+            <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
+            <TabsTrigger value="page-views" className="text-xs sm:text-sm">Page Views</TabsTrigger>
+            <TabsTrigger value="interactions" className="text-xs sm:text-sm">User Interactions</TabsTrigger>
+            <TabsTrigger value="database" className="text-xs sm:text-sm">Database</TabsTrigger>
+            <TabsTrigger value="chat-history" className="text-xs sm:text-sm">Chat History</TabsTrigger>
           </TabsList>
           
           <a 
@@ -1052,9 +922,9 @@ export default function Admin() {
               localStorage.removeItem('admin_auth');
               window.location.href = '/admin';
             }}
-            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors duration-200 flex items-center gap-2 font-medium shadow-md"
+            className="px-3 py-2 sm:px-4 sm:py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition-colors duration-200 flex items-center gap-2 font-medium shadow-md w-full sm:w-auto justify-center sm:justify-start mt-2 sm:mt-0"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 1 1 2 0v3a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V4a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3a1 1 0 1 1-2 0V4a1 1 0 0 0-1-1H3z" clipRule="evenodd" />
               <path fillRule="evenodd" d="M13.707 8.707a1 1 0 0 0 0-1.414l-2-2a1 1 0 0 0-1.414 1.414L11.586 8H6a1 1 0 1 0 0 2h5.586l-1.293 1.293a1 1 0 0 0 1.414 1.414l2-2a1 1 0 0 0 0-1.414z" clipRule="evenodd" />
             </svg>
@@ -1063,15 +933,15 @@ export default function Admin() {
         </div>
 
         <TabsContent value="analytics">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">Analytics Dashboard</h2>
-            <div className="flex items-center space-x-2">
-              <label className="text-sm text-muted-foreground">Date Range:</label>
+          <div className="flex justify-between items-center mb-6 flex-wrap">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-0">Analytics Dashboard</h2>
+            <div className="flex items-center space-x-2 w-full sm:w-auto justify-start mt-2 sm:mt-0">
+              <label className="text-xs sm:text-sm text-muted-foreground">Date Range:</label>
               <Select 
                 value={analyticsDateRange} 
                 onValueChange={(value) => fetchAnalyticsData(value)}
               >
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-[130px] sm:w-[160px] text-xs sm:text-sm h-8 sm:h-10">
                   <SelectValue placeholder="Select Range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1081,38 +951,38 @@ export default function Admin() {
                   <SelectItem value="year">Last Year</SelectItem>
                 </SelectContent>
               </Select>
-              {loading && <span className="text-sm text-muted-foreground">Loading...</span>}
+              {loading && <span className="text-xs sm:text-sm text-muted-foreground">Loading...</span>}
             </div>
           </div>
           
-          <p className="text-muted-foreground mb-6">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-6">
             This dashboard provides insights into site traffic, user behavior, and engagement patterns. 
             Use the date range selector above to filter data by different time periods.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Total Page Views</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg">Total Page Views</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">{pageViews.length}</p>
+                <p className="text-2xl sm:text-3xl font-bold">{pageViews.length}</p>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader>
-                <CardTitle>Total Interactions</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg">Total Interactions</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">{interactions.length}</p>
+                <p className="text-2xl sm:text-3xl font-bold">{interactions.length}</p>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader>
-                <CardTitle>Unique Visitors</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg">Unique Visitors</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">
+                <p className="text-2xl sm:text-3xl font-bold">
                   {new Set(pageViews.map(view => view.visitor_ip)).size}
                 </p>
               </CardContent>
@@ -1122,14 +992,14 @@ export default function Admin() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Top Pages Chart */}
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Top Pages</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">Top Pages</CardTitle>
                   <BarChart3 size={16} className="text-muted-foreground" />
                 </div>
-                <CardDescription>Most visited pages on your site</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Most visited pages on your site</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-1 sm:p-4">
                 <ChartContainer
                   config={{
                     views: {
@@ -1139,35 +1009,33 @@ export default function Admin() {
                   }}
                   className="aspect-[4/3]"
                 >
-                  <RechartsPrimitive.ResponsiveContainer width="100%" height={300}>
-                    <RechartsPrimitive.BarChart data={getPageViewsByPage()}>
-                      <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-                      <RechartsPrimitive.XAxis 
-                        dataKey="name" 
-                        tick={{ fontSize: 12 }}
-                        tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
-                      />
-                      <RechartsPrimitive.YAxis width={40} />
-                      <ChartTooltip
-                        content={<ChartTooltipContent />}
-                      />
-                      <RechartsPrimitive.Bar dataKey="value" name="views" fill="var(--color-views)" />
-                    </RechartsPrimitive.BarChart>
-                  </RechartsPrimitive.ResponsiveContainer>
+                  <RechartsPrimitive.BarChart data={getPageViewsByPage()} width={500} height={300}>
+                    <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+                    <RechartsPrimitive.XAxis 
+                      dataKey="name" 
+                      tick={{ fontSize: 12 }}
+                      tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
+                    />
+                    <RechartsPrimitive.YAxis width={40} />
+                    <ChartTooltip
+                      content={<ChartTooltipContent />}
+                    />
+                    <RechartsPrimitive.Bar dataKey="value" name="views" fill="var(--color-views)" />
+                  </RechartsPrimitive.BarChart>
                 </ChartContainer>
               </CardContent>
             </Card>
             
             {/* Device Types Pie Chart */}
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Device Types</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">Unique Visitors by Device</CardTitle>
                   <PieChart size={16} className="text-muted-foreground" />
                 </div>
-                <CardDescription>Breakdown of device types used by visitors</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Device types used by unique visitors</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-1 sm:p-4">
                 <ChartContainer
                   config={{
                     Mobile: {
@@ -1189,91 +1057,87 @@ export default function Admin() {
                   }}
                   className="aspect-[4/3]"
                 >
-                  <RechartsPrimitive.ResponsiveContainer width="100%" height={300}>
-                    <RechartsPrimitive.PieChart>
-                      <RechartsPrimitive.Pie
-                        data={getDeviceTypes()}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        label={data => `${data.name}: ${data.value}`}
-                        labelLine={false}
-                      >
-                        {getDeviceTypes().map((entry, index) => (
-                          <RechartsPrimitive.Cell 
-                            key={`cell-${index}`} 
-                            fill={`var(--color-${entry.name})`} 
-                          />
-                        ))}
-                      </RechartsPrimitive.Pie>
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                    </RechartsPrimitive.PieChart>
-                  </RechartsPrimitive.ResponsiveContainer>
+                  <RechartsPrimitive.PieChart width={500} height={300}>
+                    <RechartsPrimitive.Pie
+                      data={getDeviceTypes()}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label={data => `${data.name}: ${data.value}`}
+                      labelLine={false}
+                    >
+                      {getDeviceTypes().map((entry, index) => (
+                        <RechartsPrimitive.Cell 
+                          key={`cell-${index}`} 
+                          fill={`var(--color-${entry.name})`} 
+                        />
+                      ))}
+                    </RechartsPrimitive.Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <ChartLegend content={<ChartLegendContent />} />
+                  </RechartsPrimitive.PieChart>
                 </ChartContainer>
               </CardContent>
             </Card>
             
             {/* Daily Views Line Chart */}
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Daily Page Views</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">Daily Unique Visitors</CardTitle>
                   <LineChart size={16} className="text-muted-foreground" />
                 </div>
-                <CardDescription>Page view trends for the past week</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Unique visitor trends for the past week</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-1 sm:p-4">
                 <ChartContainer
                   config={{
-                    views: {
-                      label: "Views",
+                    visitors: {
+                      label: "Unique Visitors",
                       color: "#8b5cf6"
                     }
                   }}
                   className="aspect-[4/3]"
                 >
-                  <RechartsPrimitive.ResponsiveContainer width="100%" height={300}>
-                    <RechartsPrimitive.LineChart data={getViewsByDay()}>
-                      <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-                      <RechartsPrimitive.XAxis 
-                        dataKey="date" 
-                        tickFormatter={date => {
-                          const [year, month, day] = date.split('-');
-                          return `${month}/${day}`;
-                        }} 
-                      />
-                      <RechartsPrimitive.YAxis width={40} />
-                      <ChartTooltip 
-                        content={({active, payload}) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div className="font-medium">Date:</div>
-                                  <div>{data.date}</div>
-                                  <div className="font-medium">Views:</div>
-                                  <div>{data.views}</div>
-                                </div>
+                  <RechartsPrimitive.LineChart data={getViewsByDay()} width={500} height={300}>
+                    <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+                    <RechartsPrimitive.XAxis 
+                      dataKey="date" 
+                      tickFormatter={date => {
+                        const [year, month, day] = date.split('-');
+                        return `${month}/${day}`;
+                      }} 
+                    />
+                    <RechartsPrimitive.YAxis width={40} />
+                    <ChartTooltip 
+                      content={({active, payload}) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="font-medium">Date:</div>
+                                <div>{data.date}</div>
+                                <div className="font-medium">Visitors:</div>
+                                <div>{data.visitors}</div>
                               </div>
-                            );
-                          }
-                          return null;
-                        }} 
-                      />
-                      <RechartsPrimitive.Line
-                        type="monotone"
-                        dataKey="views"
-                        name="views"
-                        stroke="var(--color-views)"
-                        strokeWidth={2}
-                        dot={true}
-                      />
-                    </RechartsPrimitive.LineChart>
-                  </RechartsPrimitive.ResponsiveContainer>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }} 
+                    />
+                    <RechartsPrimitive.Line
+                      type="monotone"
+                      dataKey="visitors"
+                      name="visitors"
+                      stroke="var(--color-visitors)"
+                      strokeWidth={2}
+                      dot={true}
+                    />
+                  </RechartsPrimitive.LineChart>
                 </ChartContainer>
               </CardContent>
             </Card>
@@ -1297,118 +1161,24 @@ export default function Admin() {
                   }}
                   className="aspect-[4/3]"
                 >
-                  <RechartsPrimitive.ResponsiveContainer width="100%" height={300}>
-                    <RechartsPrimitive.BarChart 
-                      data={getInteractionsByType()} 
-                      layout="vertical"
-                    >
-                      <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-                      <RechartsPrimitive.XAxis type="number" />
-                      <RechartsPrimitive.YAxis 
-                        type="category" 
-                        dataKey="name" 
-                        width={100}
-                        tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
-                      />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <RechartsPrimitive.Bar dataKey="value" name="interactions" fill="var(--color-interactions)" />
-                    </RechartsPrimitive.BarChart>
-                  </RechartsPrimitive.ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="mt-6">
-            <Card className="w-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Activity Heatmap</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <span className="h-3 w-3 rounded-full bg-blue-200"></span>
-                    <span className="text-xs text-muted-foreground">Low</span>
-                    <span className="h-3 w-3 rounded-full bg-blue-500"></span>
-                    <span className="text-xs text-muted-foreground">Medium</span>
-                    <span className="h-3 w-3 rounded-full bg-blue-800"></span>
-                    <span className="text-xs text-muted-foreground">High</span>
-                  </div>
-                </div>
-                <CardDescription>Visitor activity patterns by hour and day of week</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="w-full h-[500px]">
-                  <ChartContainer
-                    config={{
-                      activity: {
-                        color: "#0ea5e9"
-                      }
-                    }}
+                  <RechartsPrimitive.BarChart 
+                    data={getInteractionsByType()} 
+                    layout="vertical"
+                    width={500}
+                    height={300}
                   >
-                    <RechartsPrimitive.ResponsiveContainer width="100%" height={500}>
-                      <RechartsPrimitive.ScatterChart
-                        margin={{ top: 20, right: 30, bottom: 40, left: 80 }}
-                      >
-                        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-                        <RechartsPrimitive.XAxis 
-                          type="number" 
-                          dataKey="hour" 
-                          domain={[0, 23]} 
-                          name="Hour" 
-                          ticks={[0, 3, 6, 9, 12, 15, 18, 21, 23]}
-                          tickSize={8}
-                          label={{ value: 'Hour of Day', position: 'bottom', offset: 20 }}
-                        />
-                        <RechartsPrimitive.YAxis 
-                          type="category" 
-                          dataKey="day" 
-                          name="Day" 
-                          width={80}
-                          tickSize={8}
-                        />
-                        <ChartTooltip 
-                          cursor={{ strokeDasharray: '3 3' }}
-                          content={({active, payload}) => {
-                            if (active && payload && payload.length) {
-                              const data = payload[0].payload;
-                              return (
-                                <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                  <div className="grid gap-1">
-                                    <div className="font-medium">{data.day}, {data.hour}:00</div>
-                                    <div>{data.value} visits</div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <RechartsPrimitive.Scatter
-                          data={getActivityHeatmap()}
-                          fill="#8884d8"
-                          shape={(props) => {
-                            const { cx, cy, payload } = props;
-                            const value = payload.value;
-                            const size = Math.min(24, Math.max(6, value * 4 + 6));
-                            
-                            // Color based on activity level
-                            let color = '#bfdbfe'; // Low (blue-200)
-                            if (value > 5) color = '#3b82f6'; // Medium (blue-500)
-                            if (value > 10) color = '#1e40af'; // High (blue-800)
-                            
-                            return (
-                              <circle 
-                                cx={cx} 
-                                cy={cy} 
-                                r={size / 2} 
-                                fill={color} 
-                                fillOpacity={0.8}
-                              />
-                            );
-                          }}
-                        />
-                      </RechartsPrimitive.ScatterChart>
-                    </RechartsPrimitive.ResponsiveContainer>
-                  </ChartContainer>
-                </div>
+                    <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+                    <RechartsPrimitive.XAxis type="number" />
+                    <RechartsPrimitive.YAxis 
+                      type="category" 
+                      dataKey="name" 
+                      width={100}
+                      tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <RechartsPrimitive.Bar dataKey="value" name="interactions" fill="var(--color-interactions)" />
+                  </RechartsPrimitive.BarChart>
+                </ChartContainer>
               </CardContent>
             </Card>
           </div>
@@ -1498,7 +1268,6 @@ export default function Admin() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Database Tools</CardTitle>
                 <div className="flex gap-2">
-                  {renderSetupButton()}
                   <Button 
                     variant="outline" 
                     onClick={() => setShowSqlDialog(true)}
@@ -1510,7 +1279,7 @@ export default function Admin() {
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
                   The database tab allows you to browse and manage your database tables. 
-                  If you don't see any tables, click the Setup Database Functions button above.
+                  Select a table from the list below to view and edit its data.
                 </p>
               </CardContent>
             </Card>
