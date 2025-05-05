@@ -12,14 +12,15 @@ export const createChatConversation = async (): Promise<string | null> => {
     const { data, error } = await supabase
       .from('chat_conversations')
       .insert({
-        visitor_ip: await getVisitorIP(),
-        user_agent: navigator.userAgent
+        visitor_ip: 'anonymous', // Use a fixed value instead of getting IP
+        user_agent: navigator.userAgent,
+        is_active: true
       })
       .select('id')
       .single();
     
     if (error) throw error;
-    return data.id;
+    return data.id as string;
   } catch (error) {
     console.error('Error creating chat conversation:', error);
     return null;
@@ -29,9 +30,16 @@ export const createChatConversation = async (): Promise<string | null> => {
 // Save a message to a conversation
 export const saveChatMessage = async (
   conversationId: string,
-  message: { text: string; sender: 'user' | 'bot' }
+  message: { text: string; sender: 'user' | 'bot' },
+  isFirstMessage: boolean = false
 ): Promise<boolean> => {
   try {
+    // Skip saving if it's the first message
+    if (isFirstMessage) {
+      console.log('Skipping save for first welcome message');
+      return true;
+    }
+    
     // 1. Insert the message
     const { error: messageError } = await supabase
       .from('chat_messages')
@@ -59,7 +67,7 @@ export const saveChatMessage = async (
 };
 
 // Save a full conversation history
-export const saveConversationHistory = async (messages: Message[], skipInitialMessage: boolean = true): Promise<boolean> => {
+export const saveConversationHistory = async (messages: Message[]): Promise<boolean> => {
   if (messages.length === 0) return false;
   
   try {
@@ -67,11 +75,12 @@ export const saveConversationHistory = async (messages: Message[], skipInitialMe
     const conversationId = await createChatConversation();
     if (!conversationId) return false;
     
-    // Save all messages, optionally skipping the first welcome message
-    const messagesToSave = skipInitialMessage && messages[0].sender === 'bot' 
-      ? messages.slice(1) 
-      : messages;
+    // Skip the first message and save the rest
+    const messagesToSave = messages.slice(1);
     
+    if (messagesToSave.length === 0) return true; // No messages to save after skipping first
+    
+    // Save all messages except the first one
     const messagePromises = messagesToSave.map(msg => 
       saveChatMessage(conversationId, {
         text: msg.text,
@@ -91,10 +100,7 @@ export const saveConversationHistory = async (messages: Message[], skipInitialMe
 const getVisitorIP = async (): Promise<string> => {
   try {
     const response = await fetch('https://api.ipify.org?format=json');
-    interface IpResponse {
-      ip: string;
-    }
-    const data = await response.json() as IpResponse;
+    const data = await response.json() as { ip: string };
     return data.ip;
   } catch (error) {
     console.error('Error getting IP:', error);
