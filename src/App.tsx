@@ -17,6 +17,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 import ExperienceDetail from './pages/ExperienceDetail';
 import Admin from './pages/Admin';
 import AnalyticsMiddleware from './components/AnalyticsMiddleware';
+import Login from './pages/Login';
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const AnimatedRoutes = () => {
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/experiences/:id" element={<ExperienceDetail />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/login" element={<Login />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>

@@ -74,14 +74,22 @@ Instructions:
 
         // Create a new conversation for this chat session
         const newConversationId = await createChatConversation();
+        if (!newConversationId) {
+          console.error('Failed to create new conversation');
+          return;
+        }
+        
         setConversationId(newConversationId);
         
         // Save the welcome message
-        if (newConversationId) {
-          await saveChatMessage(newConversationId, {
-            text: messages[0].text,
-            sender: messages[0].sender
-          });
+        const welcomeMessage = messages[0];
+        const saved = await saveChatMessage(newConversationId, {
+          text: welcomeMessage.text,
+          sender: welcomeMessage.sender
+        });
+        
+        if (!saved) {
+          console.error('Failed to save welcome message');
         }
       } catch (error) {
         console.error('Error fetching data for system prompt:', error);
@@ -111,10 +119,18 @@ Instructions:
     
     // Save user message to database
     if (conversationId) {
-      await saveChatMessage(conversationId, {
-        text: userMessage.text,
-        sender: userMessage.sender
-      });
+      try {
+        const saved = await saveChatMessage(conversationId, {
+          text: userMessage.text,
+          sender: userMessage.sender
+        });
+        
+        if (!saved) {
+          console.error('Failed to save user message');
+        }
+      } catch (error) {
+        console.error('Error saving user message:', error);
+      }
     }
     
     try {
@@ -167,10 +183,18 @@ Instructions:
       
       // Save bot message to database
       if (conversationId) {
-        await saveChatMessage(conversationId, {
-          text: botMessage.text,
-          sender: botMessage.sender
-        });
+        try {
+          const saved = await saveChatMessage(conversationId, {
+            text: botMessage.text,
+            sender: botMessage.sender
+          });
+          
+          if (!saved) {
+            console.error('Failed to save bot message');
+          }
+        } catch (error) {
+          console.error('Error saving bot message:', error);
+        }
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -183,10 +207,18 @@ Instructions:
       
       // Save error message to database
       if (conversationId) {
-        await saveChatMessage(conversationId, {
-          text: errorMessage.text,
-          sender: errorMessage.sender
-        });
+        try {
+          const saved = await saveChatMessage(conversationId, {
+            text: errorMessage.text,
+            sender: errorMessage.sender
+          });
+          
+          if (!saved) {
+            console.error('Failed to save error message');
+          }
+        } catch (error) {
+          console.error('Error saving error message:', error);
+        }
       }
     } finally {
       setIsLoading(false);

@@ -19,6 +19,7 @@ import {
   ChartLegendContent
 } from '@/components/ui/chart';
 import * as RechartsPrimitive from 'recharts';
+import { motion } from 'framer-motion';
 
 interface PageView {
   id: string;
@@ -70,7 +71,6 @@ interface ChatMessage {
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
   const [pageViews, setPageViews] = useState<PageView[]>([]);
   const [interactions, setInteractions] = useState<UserInteraction[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
@@ -79,7 +79,6 @@ export default function Admin() {
   const [tableData, setTableData] = useState<any[]>([]);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [chatConversations, setChatConversations] = useState<ChatConversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<string>('');
   const [conversationMessages, setConversationMessages] = useState<ChatMessage[]>([]);
@@ -112,61 +111,8 @@ export default function Admin() {
       fetchAnalyticsData('week'); // Default to week view
       fetchTables();
       fetchChatConversations();
-    }
-  };
-
-  // Function to convert string to SHA-256 hash
-  const sha256 = async (message: string): Promise<string> => {
-    // Encode the message as UTF-8
-    const msgBuffer = new TextEncoder().encode(message);
-    
-    // Hash the message with SHA-256
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    
-    // Convert the hash to hex string
-    return Array.from(new Uint8Array(hashBuffer))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    try {
-      // Get the admin record
-      const { data, error: queryError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .limit(1)
-        .single();
-      
-      if (queryError) throw queryError;
-      
-      if (!data) {
-        setError('Admin user not found');
-        return;
-      }
-      
-      // Hash the input password with SHA-256
-      const hashedPassword = await sha256(password);
-      
-      // Compare with stored hash
-      if (hashedPassword === data.password_hash) {
-        sessionStorage.setItem('admin_auth', 'true');
-        setIsAuthenticated(true);
-        fetchAnalyticsData('week');
-        fetchTables();
-        fetchChatConversations();
-      } else {
-        setError('Invalid password');
-      }
-    } catch (err) {
-      setError('Authentication failed');
-      console.error(err);
-    } finally {
-      setLoading(false);
+    } else {
+      navigate('/login');
     }
   };
 
@@ -543,8 +489,36 @@ export default function Admin() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem('admin_auth');
-    setIsAuthenticated(false);
+    try {
+      // Clear session storage
+      sessionStorage.removeItem('admin_auth');
+      
+      // Reset all state
+      setIsAuthenticated(false);
+      setPageViews([]);
+      setInteractions([]);
+      setTables([]);
+      setTableColumns([]);
+      setCurrentTable('');
+      setTableData([]);
+      setEditingItem(null);
+      setError('');
+      setChatConversations([]);
+      setCurrentConversation('');
+      setConversationMessages([]);
+      setChatFilter('all');
+      setChatSearch('');
+      setShowSchema(false);
+      setSqlQuery('');
+      setSqlResult(null);
+      setShowSqlDialog(false);
+      setAnalyticsDateRange('week');
+      
+      // Force redirect
+      window.location.href = '/admin';
+    } catch (err) {
+      console.error('Error during logout:', err);
+    }
   };
 
   // Function to directly execute SQL in Supabase for admin use
@@ -1048,46 +1022,45 @@ export default function Admin() {
   };
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <Card className="w-[400px]">
-          <CardHeader>
-            <CardTitle>Admin Login</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <Input
-                type="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Loading...' : 'Login'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    // Redirect to login page
+    navigate('/login');
+    return null;
   }
 
   return (
     <div className="container mx-auto p-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <Button variant="outline" onClick={handleLogout}>Logout</Button>
       </div>
       
       <Tabs defaultValue="analytics">
-        <TabsList>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="page-views">Page Views</TabsTrigger>
-          <TabsTrigger value="interactions">User Interactions</TabsTrigger>
-          <TabsTrigger value="database">Database</TabsTrigger>
-          <TabsTrigger value="chat-history">Chat History</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between items-center mb-4">
+          <TabsList>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="page-views">Page Views</TabsTrigger>
+            <TabsTrigger value="interactions">User Interactions</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
+            <TabsTrigger value="chat-history">Chat History</TabsTrigger>
+          </TabsList>
+          
+          <a 
+            href="/admin" 
+            onClick={(e) => {
+              e.preventDefault();
+              document.cookie = "admin_auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              sessionStorage.removeItem('admin_auth');
+              localStorage.removeItem('admin_auth');
+              window.location.href = '/admin';
+            }}
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors duration-200 flex items-center gap-2 font-medium shadow-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 1 1 2 0v3a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V4a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3a1 1 0 1 1-2 0V4a1 1 0 0 0-1-1H3z" clipRule="evenodd" />
+              <path fillRule="evenodd" d="M13.707 8.707a1 1 0 0 0 0-1.414l-2-2a1 1 0 0 0-1.414 1.414L11.586 8H6a1 1 0 1 0 0 2h5.586l-1.293 1.293a1 1 0 0 0 1.414 1.414l2-2a1 1 0 0 0 0-1.414z" clipRule="evenodd" />
+            </svg>
+            Logout
+          </a>
+        </div>
 
         <TabsContent value="analytics">
           <div className="flex justify-between items-center mb-6">
@@ -1346,23 +1319,23 @@ export default function Admin() {
             </Card>
           </div>
           <div className="mt-6">
-            <Card>
+            <Card className="w-full">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Activity Heatmap</CardTitle>
                   <div className="flex items-center space-x-2">
-                    <span className="h-2 w-2 rounded-full bg-blue-200"></span>
+                    <span className="h-3 w-3 rounded-full bg-blue-200"></span>
                     <span className="text-xs text-muted-foreground">Low</span>
-                    <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                    <span className="h-3 w-3 rounded-full bg-blue-500"></span>
                     <span className="text-xs text-muted-foreground">Medium</span>
-                    <span className="h-2 w-2 rounded-full bg-blue-800"></span>
+                    <span className="h-3 w-3 rounded-full bg-blue-800"></span>
                     <span className="text-xs text-muted-foreground">High</span>
                   </div>
                 </div>
                 <CardDescription>Visitor activity patterns by hour and day of week</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="w-full h-[400px]">
+                <div className="w-full h-[500px]">
                   <ChartContainer
                     config={{
                       activity: {
@@ -1370,9 +1343,9 @@ export default function Admin() {
                       }
                     }}
                   >
-                    <RechartsPrimitive.ResponsiveContainer width="100%" height={400}>
+                    <RechartsPrimitive.ResponsiveContainer width="100%" height={500}>
                       <RechartsPrimitive.ScatterChart
-                        margin={{ top: 20, right: 20, bottom: 30, left: 80 }}
+                        margin={{ top: 20, right: 30, bottom: 40, left: 80 }}
                       >
                         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
                         <RechartsPrimitive.XAxis 
@@ -1380,14 +1353,16 @@ export default function Admin() {
                           dataKey="hour" 
                           domain={[0, 23]} 
                           name="Hour" 
-                          ticks={[0, 6, 12, 18, 23]}
-                          label={{ value: 'Hour', position: 'bottom', offset: 5 }}
+                          ticks={[0, 3, 6, 9, 12, 15, 18, 21, 23]}
+                          tickSize={8}
+                          label={{ value: 'Hour of Day', position: 'bottom', offset: 20 }}
                         />
                         <RechartsPrimitive.YAxis 
                           type="category" 
                           dataKey="day" 
                           name="Day" 
                           width={80}
+                          tickSize={8}
                         />
                         <ChartTooltip 
                           cursor={{ strokeDasharray: '3 3' }}
@@ -1412,7 +1387,7 @@ export default function Admin() {
                           shape={(props) => {
                             const { cx, cy, payload } = props;
                             const value = payload.value;
-                            const size = Math.min(20, Math.max(5, value * 3 + 5));
+                            const size = Math.min(24, Math.max(6, value * 4 + 6));
                             
                             // Color based on activity level
                             let color = '#bfdbfe'; // Low (blue-200)

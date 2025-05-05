@@ -166,14 +166,23 @@ const SearchPopup = () => {
     { id: 5, title: 'Contact', type: 'route' }
   ];
 
+  const additional_results: SearchItem[] = [
+    { id: 6, title: 'Admin', type: 'route' }
+  ];
+
   const get_filtered_results = () => {
+    const search_lower = search.toLowerCase();
+    
     if (!search) {
       return static_results;
     }
+
+    // Add Admin to results only when searched for
+    const admin_results = search_lower.includes('admin') ? additional_results : [];
     
-    const search_lower = search.toLowerCase();
     return [
       ...static_results.filter(item => item.title.toLowerCase().includes(search_lower)),
+      ...admin_results,
       ...projects.filter(item => item.title.toLowerCase().includes(search_lower)),
       ...experiences.filter(item => item.title.toLowerCase().includes(search_lower))
     ];
