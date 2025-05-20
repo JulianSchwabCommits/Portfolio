@@ -16,7 +16,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import ProjectDetail from "./pages/ProjectDetail";
 import ExperienceDetail from './pages/ExperienceDetail';
 import Admin from './pages/Admin';
-import AnalyticsMiddleware from './components/AnalyticsMiddleware';
+import { AnalyticsInit } from './components/AnalyticsInit';
 import Login from './pages/Login';
 
 const queryClient = new QueryClient();
@@ -52,7 +52,7 @@ const App = () => (
             <CursorShadow />
             <Navbar />
             <SearchPopup />
-            <AnalyticsMiddleware />
+            <AnalyticsInit />
             <AnimatedRoutes />
           </div>
         </BrowserRouter>

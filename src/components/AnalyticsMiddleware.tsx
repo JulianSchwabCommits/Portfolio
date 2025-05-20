@@ -1,42 +1,27 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { trackPageView, trackInteraction } from '../lib/analytics';
+import { track_page_view, track_interaction, initAnalytics, trackClick } from '../utils/analytics';
 
 export default function AnalyticsMiddleware() {
   const location = useLocation();
 
   useEffect(() => {
-    // Track page view
-    trackPageView(location.pathname);
-
-    // Track clicks on interactive elements
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const elementId = target.id || target.getAttribute('data-analytics-id');
-      
-      if (elementId) {
-        trackInteraction('click', elementId, location.pathname);
-      }
+    // Initialize analytics tracking when the app loads
+    initAnalytics();
+    
+    // Track page view on route changes
+    const handleRouteChange = () => {
+      track_page_view(location.pathname);
     };
-
-    // Track form submissions
-    const handleSubmit = (e: Event) => {
-      const form = e.target as HTMLFormElement;
-      const formId = form.id || form.getAttribute('data-analytics-id');
-      
-      if (formId) {
-        trackInteraction('form_submit', formId, location.pathname);
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-    document.addEventListener('submit', handleSubmit);
-
+    
+    // Track initial page view
+    handleRouteChange();
+    
+    // Listen for route changes (React Router doesn't trigger page reloads)
     return () => {
-      document.removeEventListener('click', handleClick);
-      document.removeEventListener('submit', handleSubmit);
+      // Clean up event listeners if needed
     };
-  }, [location]);
+  }, [location.pathname]);
 
   return null;
 } 
