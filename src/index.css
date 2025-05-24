@@ -5,6 +5,8 @@
 @tailwind utilities;
 
 @layer base {
+
+  /* Base styles */
   :root {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -53,11 +55,11 @@
   * {
     @apply border-border selection:bg-white/10 selection:text-white;
   }
-  
+
   html.light-mode * {
     @apply selection:bg-black/10 selection:text-black;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
@@ -66,58 +68,12 @@
   html {
     @apply scroll-smooth;
   }
-}
 
-@layer utilities {
-  .scrollbar-none {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
+  /* Fix SVG clickability issues */
+  svg {
+    pointer-events: auto !important;
   }
 
-  .glass-morphism {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)];
-  }
-  
-  html.light-mode .glass-morphism {
-    @apply backdrop-blur-xl bg-black/5 border border-black/10 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)];
-  }
-  
-  .neo-blur {
-    @apply backdrop-blur-2xl bg-black/40 border border-white/10;
-  }
-  
-  html.light-mode .neo-blur {
-    @apply backdrop-blur-2xl bg-white/40 border border-black/10;
-  }
-  
-  .text-gradient {
-    @apply bg-gradient-to-br from-white via-white/90 to-white/70 bg-clip-text text-transparent;
-  }
-  
-  html.light-mode .text-gradient {
-    @apply bg-gradient-to-br from-black via-black/90 to-black/70 bg-clip-text text-transparent;
-  }
-  
-  .text-gradient-primary {
-    @apply bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
-  }
-
-  .hover-scale {
-    @apply transition-all duration-300 hover:scale-[1.03];
-  }
-
-  .technologie-pill {
-    @apply text-xs font-medium px-2.5 py-1 glass-morphism rounded-full transition-all duration-300 hover:bg-white/10;
-  }
-  
-  html.light-mode .technologie-pill {
-    @apply hover:bg-black/10;
-  }
-  
   /* Light mode text improvements */
   html.light-mode h1,
   html.light-mode h2,
@@ -127,22 +83,164 @@
   html.light-mode h6 {
     @apply text-gray-900;
   }
-  
+
   html.light-mode p {
     @apply text-gray-800;
   }
-  
+
   html.light-mode .text-gray-300,
   html.light-mode .text-gray-400 {
     @apply text-gray-700;
   }
-  
+
   html.light-mode a {
     @apply text-gray-900 hover:text-black;
   }
 }
 
-/* Fix SVG clickability issues */
-svg {
-  pointer-events: auto !important;
+@layer utilities {
+
+  /* Utility classes */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-br from-white via-white/90 to-white/70 bg-clip-text text-transparent;
+  }
+
+  html.light-mode .text-gradient {
+    @apply bg-gradient-to-br from-black via-black/90 to-black/70 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-primary {
+    @apply bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
+  }
+
+  .hover-scale {
+    @apply transition-all duration-300 hover:scale-[1.03];
+  }
+}
+
+@layer components {
+
+  /* Component classes */
+  .glass-morphism {
+    @apply backdrop-blur-xl bg-white/5 border border-white/10;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  }
+
+  html.light-mode .glass-morphism {
+    @apply backdrop-blur-xl bg-black/5 border border-black/10;
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  .neo-blur {
+    @apply backdrop-blur-2xl bg-black/40 border border-white/10;
+  }
+
+  html.light-mode .neo-blur {
+    @apply backdrop-blur-2xl bg-white/40 border border-black/10;
+  }
+
+  .technologie-pill {
+    @apply text-xs font-medium px-2.5 py-1 rounded-full transition-all duration-300 hover:bg-white/10;
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  html.light-mode .technologie-pill {
+    @apply hover:bg-black/10;
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  /* Markdown styling for chatbot messages */
+  .markdown-content {
+    @apply text-sm leading-relaxed;
+  }
+
+  .markdown-content a {
+    @apply text-blue-400 hover:text-blue-300 underline;
+  }
+
+  html.light-mode .markdown-content a {
+    @apply text-blue-600 hover:text-blue-800;
+  }
+
+  .markdown-content p {
+    @apply mb-2;
+  }
+
+  .markdown-content p:last-child {
+    @apply mb-0;
+  }
+
+  .markdown-content strong,
+  .markdown-content b {
+    @apply font-semibold;
+  }
+
+  .markdown-content ul,
+  .markdown-content ol {
+    @apply pl-5 mb-2;
+  }
+
+  .markdown-content ul {
+    @apply list-disc;
+  }
+
+  .markdown-content ol {
+    @apply list-decimal;
+  }
+
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4 {
+    @apply font-bold mb-2;
+  }
+
+  .markdown-content h1 {
+    @apply text-lg;
+  }
+
+  .markdown-content h2 {
+    @apply text-base;
+  }
+
+  .markdown-content h3,
+  .markdown-content h4 {
+    @apply text-sm;
+  }
+
+  .markdown-content blockquote {
+    @apply pl-3 border-l-2 border-gray-500 italic my-2;
+  }
+
+  .markdown-content code {
+    @apply bg-gray-800 bg-opacity-50 px-1 py-0.5 rounded text-xs;
+  }
+
+  html.light-mode .markdown-content code {
+    @apply bg-gray-200 text-gray-800;
+  }
+
+  .markdown-content pre {
+    @apply bg-gray-800 bg-opacity-50 p-2 rounded my-2 overflow-x-auto;
+  }
+
+  html.light-mode .markdown-content pre {
+    @apply bg-gray-200 text-gray-800;
+  }
+
+  .markdown-content pre code {
+    @apply bg-transparent p-0;
+  }
 }

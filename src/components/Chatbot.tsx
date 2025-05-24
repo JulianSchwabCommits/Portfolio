@@ -31,17 +31,10 @@ interface ChatbotProps {
   onExpand?: () => void;
 }
 
-const generate_system_prompt = (experiences: Experience[], projects: Project[]) => {
-  const birth_date = new Date('2008-05-21');
-  const today = new Date();
-  let age = today.getFullYear() - birth_date.getFullYear();
-  const month_diff = today.getMonth() - birth_date.getMonth();
-  
-  if (month_diff < 0 || (month_diff === 0 && today.getDate() < birth_date.getDate())) {
-    age--;
-  }
+const generate_system_prompt = (experiences: Experience[], projects: Project[], age: number) => {
+  return `You are Max, Julian Shwab's personal AI assistant on his portfolio website. You're here to entertain users and share info about Julian, a passionate developer who loves endurance sports, running, and the outdoors.
 
-  const prompt = `You are Max, Julian's personal AI assistant. You should only answer questions about Julian and his projects and experiences.
+Your personality is cheeky, nerdy, and helpful throw in the occasional nerd joke or reference, but always aim to assist the user with friendly professionalism.
 
 Julian's Age: ${age} years old (born on May 21, 2008)
 
@@ -56,16 +49,11 @@ ${projects.map((proj, index) => `${index + 1}. ${proj.title} (${proj.year})
    - ${proj.description}
    - Built with: ${proj.tags.join(", ")}`).join("\n\n")}
 
-Instructions:
-1. Only answer questions about Julian, his experiences, or his projects
-2. If asked about anything else, politely redirect the conversation back to Julian
-3. Be friendly and professional
-4. Use your knowledge to provide detailed, accurate responses
-5. If you're not sure about something, say so rather than making assumptions
-6. Keep responses concise but informative
-7. When asked about Julian's age, use the calculated age of ${age} years`;
-
-  return prompt;
+1. Be friendly, professional, and approachable.
+2. Keep responses short and snappy max 3 sentences per reply, no long paragraphs.
+3. Use your knowledge to give accurate, relevant info about Julian and his work.
+4. If you're unsure about something, say so** and suggest the user visit the [Contact](https://julianschwab.dev/contact) page to reach Julian directly. Never guess.
+6. Mention Julian's love for **running, endurance sports, and the outdoors** where relevant.`;
 };
 
 const Chatbot = ({ onExpand }: ChatbotProps) => {
@@ -89,11 +77,22 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
         if (projects_res.error) throw projects_res.error;
         if (experiences_res.error) throw experiences_res.error;
 
+        const birth_date = new Date('2008-05-21');
+        const today = new Date();
+        let age = today.getFullYear() - birth_date.getFullYear();
+        const month_diff = today.getMonth() - birth_date.getMonth();
+
+        if (month_diff < 0 || (month_diff === 0 && today.getDate() < birth_date.getDate())) {
+          age--;
+        }
+
         const prompt = generate_system_prompt(
           experiences_res.data || [],
-          projects_res.data || []
+          projects_res.data || [],
+          age
         );
         setSystemPrompt(prompt);
+        console.log('System Prompt:', prompt);
       } catch (error) {
         console.error('Error fetching data for system prompt:', error);
       }
@@ -112,61 +111,68 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
 
   const handleSendMessage = async () => {
     if (input.trim() === "" || isLoading || !systemPrompt) return;
-    
+
     const userMessage = {
       id: messages.length + 1,
       text: input,
       sender: "user" as const
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-    
+
     try {
-      const api_key = import.meta.env.VITE_OPENROUTER_API_KEY;
-      console.log('OpenRouter API Key:', api_key ? 'Present' : 'Missing');
-      
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const api_key = import.meta.env.VITE_GEMINI_API;
+      console.log('Gemini API Key:', api_key ? 'Present' : 'Missing');
+
+      // Format request according to Gemini API specifications
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${api_key}`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${api_key}`,
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "Julian's Portfolio"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-r1-distill-llama-70b:free",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages.map(msg => ({
-              role: msg.sender === "user" ? "user" : "assistant",
-              content: msg.text
-            })),
-            { role: "user", content: input }
+          contents: [
+            {
+              parts: [
+                {
+                  text: systemPrompt
+                }
+              ],
+              role: "user"
+            },
+            {
+              parts: [
+                {
+                  text: input
+                }
+              ],
+              role: "user"
+            }
           ]
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('OpenRouter API Error:', errorData);
+        console.error('Gemini API Error:', errorData);
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('OpenRouter API Response:', data);
-      
-      if (!data.choices?.[0]?.message?.content) {
+      console.log('Gemini API Response:', data);
+
+      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
         throw new Error('Invalid response format');
       }
 
       const botMessage = {
         id: messages.length + 2,
-        text: data.choices[0].message.content,
+        text: data.candidates[0].content.parts[0].text,
         sender: "bot" as const
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Chat error:', error);
@@ -182,7 +188,7 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className={`glass-morphism rounded-2xl overflow-hidden flex flex-col h-[400px] ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
@@ -208,33 +214,51 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className={`flex ${
-                message.sender === "user" ? "justify-end" : "justify-start"
-              } mb-4`}
+              className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                } mb-4`}
             >
               <div
-                className={`max-w-[80%] px-4 py-3 rounded-2xl ${
-                  message.sender === "user"
-                    ? theme === 'light' 
-                      ? 'bg-gray-200 text-gray-800'
-                      : 'bg-white/10 text-white'
-                    : theme === 'light'
-                      ? 'bg-gray-100 text-gray-800'
-                      : 'bg-white/5 text-white'
-                }`}
-                style={{ 
+                className={`max-w-[80%] px-4 py-3 rounded-2xl ${message.sender === "user"
+                  ? theme === 'light'
+                    ? 'bg-gray-200 text-gray-800'
+                    : 'bg-white/10 text-white'
+                  : theme === 'light'
+                    ? 'bg-gray-100 text-gray-800'
+                    : 'bg-white/5 text-white'
+                  } markdown-content`}
+                style={{
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-word'
                 }}
               >
-                {message.text}
+                {message.sender === "bot" ? (
+                  <div dangerouslySetInnerHTML={{
+                    __html: message.text
+                      // Render markdown links first
+                      .replace(
+                        /\[([^\]]+)\]\(([^)]+)\)/g,
+                        (_, text, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`
+                      )
+                      // Then render plain URLs that are not already inside an anchor tag
+                      .replace(
+                        /(?<![">])((https?:\/\/)[^\s<]+)/g,
+                        (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
+                      )
+                      // Convert markdown bold
+                      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                      // Convert markdown italic
+                      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                  }} />
+                ) : (
+                  message.text
+                )}
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
-      
+
       <div className="p-4 absolute bottom-0 left-0 right-0 z-10">
         <form
           onSubmit={(e) => {
@@ -267,13 +291,12 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
                 }
               }}
               placeholder="Ask me anything about Julian..."
-              className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none ${
-                theme === 'light' 
-                  ? 'bg-gray-200 text-gray-800 placeholder-gray-500'
-                  : 'bg-[#27272a] text-white placeholder-gray-400'
-              } focus:outline-none focus:ring-1 focus:ring-white/20`}
-              style={{ 
-                whiteSpace: 'pre-wrap', 
+              className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none ${theme === 'light'
+                ? 'bg-gray-200 text-gray-800 placeholder-gray-500'
+                : 'bg-[#27272a] text-white placeholder-gray-400'
+                } focus:outline-none focus:ring-1 focus:ring-white/20`}
+              style={{
+                whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 height: '40px',
                 maxHeight: '120px',
