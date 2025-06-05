@@ -36,7 +36,7 @@ const generate_system_prompt = (experiences: Experience[], projects: Project[]) 
   const today = new Date();
   let age = today.getFullYear() - birth_date.getFullYear();
   const month_diff = today.getMonth() - birth_date.getMonth();
-  
+
   if (month_diff < 0 || (month_diff === 0 && today.getDate() < birth_date.getDate())) {
     age--;
   }
@@ -112,67 +112,63 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
 
   const handleSendMessage = async () => {
     if (input.trim() === "" || isLoading || !systemPrompt) return;
-    
+
     const userMessage = {
       id: messages.length + 1,
       text: input,
       sender: "user" as const
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-    
+
     try {
-      const api_key = import.meta.env.VITE_OPENROUTER_API_KEY;
-      console.log('OpenRouter API Key:', api_key ? 'Present' : 'Missing');
-      
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const api_key = import.meta.env.VITE_GEMINI_API_KEY;
+      console.log('Gemini API Key:', api_key ? 'Present' : 'Missing');
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${api_key}`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${api_key}`,
-          "HTTP-Referer": window.location.origin,
-          "X-Title": "Julian's Portfolio"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-r1-distill-llama-70b:free",
-          messages: [
-            { role: "system", content: systemPrompt },
+          contents: [
+            { role: "user", parts: [{ text: systemPrompt }] },
             ...messages.map(msg => ({
-              role: msg.sender === "user" ? "user" : "assistant",
-              content: msg.text
+              role: msg.sender === "user" ? "user" : "model",
+              parts: [{ text: msg.text }]
             })),
-            { role: "user", content: input }
+            { role: "user", parts: [{ text: input }] }
           ]
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('OpenRouter API Error:', errorData);
+        console.error('Gemini API Error:', errorData);
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('OpenRouter API Response:', data);
-      
-      if (!data.choices?.[0]?.message?.content) {
+      console.log('Gemini API Response:', data);
+
+      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
         throw new Error('Invalid response format');
       }
 
       const botMessage = {
         id: messages.length + 2,
-        text: data.choices[0].message.content,
+        text: data.candidates[0].content.parts[0].text,
         sender: "bot" as const
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      console.error('Chat error:', error);
+      console.error('Error sending message:', error);
       const errorMessage = {
         id: messages.length + 2,
-        text: "Sorry, I'm having trouble connecting to my AI brain right now. Please try again in a moment.",
+        text: "Sorry, I encountered an error. Please try again.",
         sender: "bot" as const
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -182,7 +178,7 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className={`glass-morphism rounded-2xl overflow-hidden flex flex-col h-[400px] ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
@@ -208,21 +204,19 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className={`flex ${
-                message.sender === "user" ? "justify-end" : "justify-start"
-              } mb-4`}
+              className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                } mb-4`}
             >
               <div
-                className={`max-w-[80%] px-4 py-3 rounded-2xl ${
-                  message.sender === "user"
-                    ? theme === 'light' 
-                      ? 'bg-gray-200 text-gray-800'
-                      : 'bg-white/10 text-white'
-                    : theme === 'light'
-                      ? 'bg-gray-100 text-gray-800'
-                      : 'bg-white/5 text-white'
-                }`}
-                style={{ 
+                className={`max-w-[80%] px-4 py-3 rounded-2xl ${message.sender === "user"
+                  ? theme === 'light'
+                    ? 'bg-gray-200 text-gray-800'
+                    : 'bg-white/10 text-white'
+                  : theme === 'light'
+                    ? 'bg-gray-100 text-gray-800'
+                    : 'bg-white/5 text-white'
+                  }`}
+                style={{
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-word'
                 }}
@@ -234,7 +228,7 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
         </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
-      
+
       <div className="p-4 absolute bottom-0 left-0 right-0 z-10">
         <form
           onSubmit={(e) => {
@@ -267,13 +261,12 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
                 }
               }}
               placeholder="Ask me anything about Julian..."
-              className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none ${
-                theme === 'light' 
-                  ? 'bg-gray-200 text-gray-800 placeholder-gray-500'
-                  : 'bg-[#27272a] text-white placeholder-gray-400'
-              } focus:outline-none focus:ring-1 focus:ring-white/20`}
-              style={{ 
-                whiteSpace: 'pre-wrap', 
+              className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none ${theme === 'light'
+                ? 'bg-gray-200 text-gray-800 placeholder-gray-500'
+                : 'bg-[#27272a] text-white placeholder-gray-400'
+                } focus:outline-none focus:ring-1 focus:ring-white/20`}
+              style={{
+                whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 height: '40px',
                 maxHeight: '120px',
