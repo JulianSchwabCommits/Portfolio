@@ -28,7 +28,7 @@ interface Message {
 }
 
 interface ChatbotProps {
-  onExpand?: () => void;
+  onExpand?: (messages: Message[]) => void;
 }
 
 const generate_system_prompt = (experiences: Experience[], projects: Project[]) => {
@@ -69,9 +69,12 @@ Instructions:
 };
 
 const Chatbot = ({ onExpand }: ChatbotProps) => {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "Hi! I'm Max, Julian's AI assistant. How can I help you learn more about Julian?", sender: "bot" }
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const savedMessages = localStorage.getItem('chatMessages');
+    return savedMessages ? JSON.parse(savedMessages) : [
+      { id: 1, text: "Hi! I'm Max, Julian's AI assistant. How can I help you learn more about Julian?", sender: "bot" }
+    ];
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -102,6 +105,10 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
     fetch_data();
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
+  }, [messages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -127,28 +134,19 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
       const api_key = import.meta.env.VITE_GEMINI_API_KEY;
       console.log('Gemini API Key:', api_key ? 'Present' : 'Missing');
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${api_key}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${api_key}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
           contents: [
-            {
-              parts: [
-                { text: systemPrompt }
-              ]
-            },
+            { role: "user", parts: [{ text: systemPrompt }] },
             ...messages.map(msg => ({
-              parts: [
-                { text: msg.text }
-              ]
+              role: msg.sender === "user" ? "user" : "model",
+              parts: [{ text: msg.text }]
             })),
-            {
-              parts: [
-                { text: input }
-              ]
-            }
+            { role: "user", parts: [{ text: input }] }
           ]
         })
       });
@@ -195,7 +193,7 @@ const Chatbot = ({ onExpand }: ChatbotProps) => {
       <div className="flex justify-end items-center p-4 relative z-10">
         {onExpand && (
           <motion.button
-            onClick={onExpand}
+            onClick={() => onExpand && onExpand(messages)}
             className="p-2 rounded-full hover:bg-white/10 transition-colors absolute top-2 right-2"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}

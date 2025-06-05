@@ -11,13 +11,18 @@ interface Message {
 
 interface ChatbotPopupProps {
   initialMessage?: string;
+  initialMessages?: Message[];
   onClose: () => void;
 }
 
-const ChatbotPopup = ({ initialMessage, onClose }: ChatbotPopupProps) => {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "Hi! I'm Max, Julian's AI assistant. How can I help you learn more about Julian?", sender: "bot" }
-  ]);
+const ChatbotPopup = ({ initialMessage, initialMessages, onClose }: ChatbotPopupProps) => {
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const savedMessages = localStorage.getItem('chatMessages');
+    // Use initialMessages if provided (e.g., from a parent), otherwise load from localStorage
+    return initialMessages || (savedMessages ? JSON.parse(savedMessages) : [
+      { id: 1, text: "Hi! I'm Max, Julian's AI assistant. How can I help you learn more about Julian?", sender: "bot" }
+    ]);
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState("");
   const [input, setInput] = useState("");
@@ -83,6 +88,10 @@ Instructions:
     }
   }, [initialMessage, systemPrompt]);
 
+  useEffect(() => {
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
+  }, [messages]);
+
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || isLoading || !systemPrompt) return;
 
@@ -99,28 +108,19 @@ Instructions:
       const api_key = import.meta.env.VITE_GEMINI_API_KEY;
       console.log('Gemini API Key:', api_key ? 'Present' : 'Missing');
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${api_key}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${api_key}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
           contents: [
-            {
-              parts: [
-                { text: systemPrompt }
-              ]
-            },
+            { role: "user", parts: [{ text: systemPrompt }] },
             ...messages.map(msg => ({
-              parts: [
-                { text: msg.text }
-              ]
+              role: msg.sender === "user" ? "user" : "model",
+              parts: [{ text: msg.text }]
             })),
-            {
-              parts: [
-                { text: message }
-              ]
-            }
+            { role: "user", parts: [{ text: message }] }
           ]
         })
       });
