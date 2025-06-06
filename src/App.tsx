@@ -16,6 +16,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { ChatProvider } from "./context/ChatContext";
 import ProjectDetail from "./pages/ProjectDetail";
 import ExperienceDetail from './pages/ExperienceDetail';
+import usePageTitle from "./hooks/use-page-title";
 
 const queryClient = new QueryClient();
 
@@ -37,25 +38,30 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <ChatProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <div className="relative">
-              <CursorShadow />
-              <Navbar />
-              <SearchPopup />
-              <AnimatedRoutes />
-            </div>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ChatProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Use the page title hook
+  usePageTitle();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <ChatProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <div className="relative">
+                <CursorShadow />
+                <Navbar />
+                <SearchPopup />
+                <AnimatedRoutes />
+              </div>
+            </BrowserRouter>
+          </TooltipProvider>
+        </ChatProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
