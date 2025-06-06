@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import CursorShadow from "./components/CursorShadow";
 import SearchPopup from "./components/SearchPopup";
 import { ThemeProvider } from "./context/ThemeContext";
+import { ChatProvider } from "./context/ChatContext";
 import ProjectDetail from "./pages/ProjectDetail";
 import ExperienceDetail from './pages/ExperienceDetail';
 
@@ -39,18 +40,20 @@ const AnimatedRoutes = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="relative">
-            <CursorShadow />
-            <Navbar />
-            <SearchPopup />
-            <AnimatedRoutes />
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ChatProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <div className="relative">
+              <CursorShadow />
+              <Navbar />
+              <SearchPopup />
+              <AnimatedRoutes />
+            </div>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ChatProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
