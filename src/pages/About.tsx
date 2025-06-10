@@ -54,7 +54,7 @@ const use3DTilt = () => {
 };
 
 // 3D Tilt Image Component
-const TiltImage = ({ src, alt }: { src: string; alt: string }) => {
+const TiltImage = ({ src, alt, onClick }: { src: string; alt: string; onClick: () => void }) => {
   const { theme } = use_theme();
   const { ref, transform, glareStyle, handleMouseMove, handleMouseLeave, isHovered } = use3DTilt();
 
@@ -62,7 +62,7 @@ const TiltImage = ({ src, alt }: { src: string; alt: string }) => {
     <div style={{ perspective: '1000px' }} className="aspect-[3/4]">
       <div
         ref={ref}
-        className={`glass-morphism rounded-2xl overflow-hidden w-full h-full cursor-pointer transform-gpu transition-all duration-200 ${
+        className={`glass-morphism rounded-2xl overflow-hidden w-full h-full cursor-pointer transform-gpu transition-all duration-200 relative ${
           isHovered ? 'shadow-2xl shadow-white/10' : 'shadow-lg shadow-black/20'
         }`}
         style={{
@@ -72,6 +72,7 @@ const TiltImage = ({ src, alt }: { src: string; alt: string }) => {
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onClick={onClick}
       >
         {/* Enhanced background on hover */}
         <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl transition-opacity duration-200 z-10 ${
@@ -90,6 +91,30 @@ const TiltImage = ({ src, alt }: { src: string; alt: string }) => {
         {/* Reflection gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-2xl pointer-events-none z-10" />
         
+        {/* Expand Icon */}
+        <div className={`absolute top-4 right-4 z-30 transition-all duration-200 ${
+          isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+        }`}>
+          <div className="glass-morphism p-2 rounded-lg backdrop-blur-md">
+            <svg 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className="text-white"
+            >
+              <polyline points="15,3 21,3 21,9"/>
+              <polyline points="9,21 3,21 3,15"/>
+              <line x1="21" y1="3" x2="14" y2="10"/>
+              <line x1="3" y1="21" x2="10" y2="14"/>
+            </svg>
+          </div>
+        </div>
+        
         <div className="relative z-30 w-full h-full transform-gpu" style={{ transform: 'translateZ(20px)' }}>
           <img 
             src={src} 
@@ -102,10 +127,167 @@ const TiltImage = ({ src, alt }: { src: string; alt: string }) => {
   );
 };
 
+// Image Gallery Modal Component
+const ImageGallery = ({ 
+  images, 
+  currentIndex, 
+  isOpen, 
+  onClose, 
+  onNext, 
+  onPrev 
+}: {
+  images: { src: string; alt: string }[];
+  currentIndex: number;
+  isOpen: boolean;
+  onClose: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+}) => {
+  const { theme } = use_theme();
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      
+      switch (e.key) {
+        case 'Escape':
+          onClose();
+          break;
+        case 'ArrowLeft':
+          onPrev();
+          break;
+        case 'ArrowRight':
+          onNext();
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [isOpen, onClose, onNext, onPrev]);
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        onClick={onClose}
+      >
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+        
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className={`absolute top-6 right-6 z-60 glass-morphism p-3 rounded-lg transition-all duration-200 hover:scale-110 ${
+            theme === 'light' ? 'text-gray-800' : 'text-white'
+          }`}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        {/* Navigation buttons */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onPrev();
+          }}
+          className={`absolute left-6 z-60 glass-morphism p-4 rounded-lg transition-all duration-200 hover:scale-110 ${
+            theme === 'light' ? 'text-gray-800' : 'text-white'
+          }`}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15,18 9,12 15,6"/>
+          </svg>
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onNext();
+          }}
+          className={`absolute right-6 z-60 glass-morphism p-4 rounded-lg transition-all duration-200 hover:scale-110 ${
+            theme === 'light' ? 'text-gray-800' : 'text-white'
+          }`}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9,18 15,12 9,6"/>
+          </svg>
+        </button>        {/* Image container */}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="relative glass-morphism rounded-2xl overflow-hidden p-4"
+          onClick={(e) => e.stopPropagation()}
+          style={{ 
+            maxWidth: '90vw', 
+            maxHeight: '90vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <img
+            src={images[currentIndex].src}
+            alt={images[currentIndex].alt}
+            className="max-w-full max-h-full object-contain rounded-lg"
+            style={{
+              maxWidth: 'calc(90vw - 2rem)',
+              maxHeight: 'calc(90vh - 2rem)'
+            }}
+          />
+          
+          {/* Image counter */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 glass-morphism px-4 py-2 rounded-lg">
+            <span className={`text-sm ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              {currentIndex + 1} / {images.length}
+            </span>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 const About = () => {
   const [about_data, set_about_data] = useState<AboutData[]>([]);
   const [loading, set_loading] = useState(true);
   const [temperature, set_temperature] = useState<number | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Define the images array
+  const images = [
+    { src: "/julian.jpg", alt: "Julian Schwab" },
+    { src: "/kiting.jpg", alt: "Julian kiteboarding" }
+  ];
+
+  const openGallery = (index: number) => {
+    setCurrentImageIndex(index);
+    setGalleryOpen(true);
+  };
+
+  const closeGallery = () => {
+    setGalleryOpen(false);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
   
   useEffect(() => {
     const fetch_temperature = async () => {
@@ -212,15 +394,14 @@ const About = () => {
                 >
                   {about_data.map((item) => renderContent(item))}
                 </motion.div>
-                
-                <motion.div 
+                  <motion.div 
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.7, delay: 0.4 }}
                   className="grid grid-cols-1 md:grid-cols-2 gap-6"
                 >
-                  <TiltImage src="/julian.jpg" alt="Julian Schwab" />
-                  <TiltImage src="/kiting.jpg" alt="Julian kiteboarding" />
+                  <TiltImage src="/julian.jpg" alt="Julian Schwab" onClick={() => openGallery(0)} />
+                  <TiltImage src="/kiting.jpg" alt="Julian kiteboarding" onClick={() => openGallery(1)} />
                 </motion.div>
               </>
             ) : (
@@ -236,10 +417,19 @@ const About = () => {
                   </a>
                 </p>
               </div>
-            )}
-          </div>
+            )}          </div>
         </div>
       </div>
+
+      {/* Image Gallery Modal */}
+      <ImageGallery
+        images={images}
+        currentIndex={currentImageIndex}
+        isOpen={galleryOpen}
+        onClose={closeGallery}
+        onNext={nextImage}
+        onPrev={prevImage}
+      />
     </PageTransition>
   );
 };
