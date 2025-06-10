@@ -10,6 +10,8 @@ interface ExperienceProps {
   period: string;
   description: string;
   technologies?: string[];
+  link?: string;
+  link_name?: string;
 }
 
 // Custom hook to detect mobile devices
@@ -83,6 +85,8 @@ const WorkExperience = ({
   period,
   description,
   technologies,
+  link,
+  link_name,
 }: ExperienceProps) => {
   const { theme } = use_theme();
   const navigate = useNavigate();
@@ -143,15 +147,30 @@ const WorkExperience = ({
         {/* Reflection gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-2xl pointer-events-none" />
         
-        <div className="relative z-20 transform-gpu" style={{ transform: 'translateZ(20px)' }}>
-          <div className="flex flex-col md:flex-row md:justify-between mb-4">
+        <div className="relative z-20 transform-gpu" style={{ transform: 'translateZ(20px)' }}>          <div className="flex flex-col md:flex-row md:justify-between mb-4">
             <div>
               <h3 className={`text-2xl font-semibold mb-1 transition-colors duration-200 ${
                 isHovered && theme === 'dark' ? 'text-white' : theme === 'light' ? 'text-gray-800' : 'text-gray-100'
               }`}>{title}</h3>
-              <p className={`mb-2 transition-colors duration-200 ${
-                isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
-              }`}>@{company}</p>
+              <div className="flex items-center gap-2 mb-2">
+                <p className={`transition-colors duration-200 ${
+                  isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
+                }`}>@{company}</p>                {link && link_name && (
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`px-2 py-1 rounded-md text-sm transition-all duration-200 hover:scale-105 ${
+                      theme === 'light' 
+                        ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' 
+                        : 'text-blue-400 hover:text-blue-300 hover:bg-blue-900/20'
+                    }`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {link_name}
+                  </a>
+                )}
+              </div>
             </div>
             <div className={`md:text-right transition-colors duration-200 ${
               isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
