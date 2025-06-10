@@ -181,15 +181,28 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
 
   return (
     <motion.div
-      className={`glass-morphism rounded-2xl overflow-hidden flex flex-col h-[400px] ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}
-      whileHover={{ scale: 1.02 }}
+      className={`glass-morphism rounded-2xl overflow-hidden flex flex-col h-[400px] transform-gpu transition-all duration-200 ${
+        theme === 'light' 
+          ? 'text-gray-800 shadow-lg shadow-gray-900/20' 
+          : 'text-white shadow-lg shadow-black/20'
+      }`}
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: theme === 'light' 
+          ? '0 25px 50px -12px rgba(0, 0, 0, 0.3)' 
+          : '0 25px 50px -12px rgba(255, 255, 255, 0.1)'
+      }}
       transition={{ duration: 0.2 }}
     >
       <div className="flex justify-end items-center p-4 relative z-10">
         {onExpand && (
           <motion.button
             onClick={onExpand}
-            className="p-2 rounded-full hover:bg-white/10 transition-colors absolute top-2 right-2"
+            className={`p-2 rounded-full transition-all duration-200 absolute top-2 right-2 ${
+              theme === 'light'
+                ? 'hover:bg-gray-200 text-gray-800'
+                : 'hover:bg-white/10 text-white'
+            }`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -210,13 +223,13 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
                 } mb-4`}
             >
               <div
-                className={`max-w-[80%] px-4 py-3 rounded-2xl ${message.sender === "user"
+                className={`max-w-[80%] px-4 py-3 rounded-2xl transition-all duration-200 ${message.sender === "user"
                   ? theme === 'light'
-                    ? 'bg-gray-200 text-gray-800'
-                    : 'bg-white/10 text-white'
+                    ? 'bg-gray-100 text-gray-800 shadow-sm shadow-gray-900/10'
+                    : 'bg-white/10 text-white shadow-sm shadow-black/20'
                   : theme === 'light'
-                    ? 'bg-gray-100 text-gray-800'
-                    : 'bg-white/5 text-white'
+                    ? 'bg-gray-50 text-gray-800 shadow-sm shadow-gray-900/10'
+                    : 'bg-white/5 text-white shadow-sm shadow-black/20'
                   } markdown-content`}
                 style={{
                   whiteSpace: 'pre-wrap',
@@ -283,10 +296,10 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
                 }
               }}
               placeholder="Ask me anything about Julian... (Press Enter to send)"
-              className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none ${theme === 'light'
-                ? 'bg-gray-200 text-gray-800 placeholder-gray-500'
-                : 'bg-[#27272a] text-white placeholder-gray-400'
-                } focus:outline-none focus:ring-1 focus:ring-white/20`}
+              className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none transition-all duration-200 ${theme === 'light'
+                ? 'bg-gray-100 text-gray-800 placeholder-gray-500 focus:bg-gray-50 shadow-sm shadow-gray-900/10'
+                : 'bg-white/5 text-white placeholder-gray-400 focus:bg-white/10 shadow-sm shadow-black/20'
+                } focus:outline-none focus:ring-1 ${theme === 'light' ? 'focus:ring-gray-300' : 'focus:ring-white/20'}`}
               style={{
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',

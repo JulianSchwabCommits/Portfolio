@@ -59,14 +59,17 @@
   html.light-mode * {
     @apply selection:bg-black/10 selection:text-black;
   }
-
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+    /* Prevent navbar shifting due to scrollbar appearing/disappearing */
+    overflow-y: scroll;
   }
 
   html {
     @apply scroll-smooth;
+    /* Reserve space for scrollbar to prevent layout shift */
+    scrollbar-gutter: stable;
   }
 
   /* Fix SVG clickability issues */

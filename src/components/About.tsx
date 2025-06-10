@@ -86,9 +86,14 @@ const About = () => {
         ref={ref}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className={`glass-morphism p-8 rounded-xl cursor-pointer transform-gpu transition-all duration-200 ${
-          isHovered ? 'shadow-2xl shadow-white/10' : 'shadow-lg shadow-black/20'
+        transition={{ duration: 0.5 }}        className={`glass-morphism p-8 rounded-2xl cursor-pointer transform-gpu transition-all duration-200 ${
+          isHovered 
+            ? theme === 'light' 
+              ? 'shadow-2xl shadow-gray-900/30' 
+              : 'shadow-2xl shadow-white/10'
+            : theme === 'light' 
+              ? 'shadow-lg shadow-gray-900/20' 
+              : 'shadow-lg shadow-black/20'
         }`}
         style={{
           transform: transform,
@@ -98,14 +103,13 @@ const About = () => {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Enhanced background on hover */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-xl transition-opacity duration-200 ${
+        {/* Enhanced background on hover */}        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl transition-opacity duration-200 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`} />
         
         {/* Glare overlay */}
         <div
-          className="absolute inset-0 pointer-events-none rounded-xl z-10"
+          className="absolute inset-0 pointer-events-none rounded-2xl z-10"
           style={{
             ...glareStyle,
             transition: 'opacity 0.3s ease-out'
@@ -113,7 +117,7 @@ const About = () => {
         />
         
         {/* Reflection gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-2xl pointer-events-none" />
         
         <div className="relative z-20 transform-gpu" style={{ transform: 'translateZ(20px)' }}>
           <p className={`text-lg leading-relaxed whitespace-pre-line transition-colors duration-200 ${

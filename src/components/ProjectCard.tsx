@@ -86,8 +86,7 @@ const ProjectCard = ({
       style={{ perspective: '1000px' }}
     >
       <div
-        ref={ref}
-        className={`glass-morphism rounded-3xl overflow-hidden p-8 h-full flex flex-col justify-between cursor-pointer transform-gpu transition-all duration-200 ${
+        ref={ref}        className={`glass-morphism rounded-2xl overflow-hidden p-8 h-full flex flex-col justify-between cursor-pointer transform-gpu transition-all duration-200 ${
           isHovered 
             ? theme === 'light' 
               ? 'shadow-2xl shadow-gray-900/30' 
@@ -105,14 +104,13 @@ const ProjectCard = ({
         onMouseLeave={handleMouseLeave}
         onClick={handleCardClick}
       >
-        {/* Enhanced background on hover */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl transition-opacity duration-200 ${
+        {/* Enhanced background on hover */}        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl transition-opacity duration-200 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`} />
         
         {/* Glare overlay */}
         <div
-          className="absolute inset-0 pointer-events-none rounded-3xl z-10"
+          className="absolute inset-0 pointer-events-none rounded-2xl z-10"
           style={{
             ...glareStyle,
             transition: 'opacity 0.3s ease-out'
@@ -120,7 +118,7 @@ const ProjectCard = ({
         />
         
         {/* Reflection gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-2xl pointer-events-none" />
         
         <div className="flex-1 relative z-20 transform-gpu" style={{ transform: 'translateZ(20px)' }}>
           <div className="flex justify-between items-start mb-4">

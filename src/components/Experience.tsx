@@ -65,11 +65,16 @@ const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="mb-6"
       style={{ perspective: '1000px' }}
-    >
-      <div
+    >      <div
         ref={ref}
-        className={`glass-morphism p-6 rounded-xl cursor-pointer transform-gpu transition-all duration-200 ${
-          isHovered ? 'shadow-2xl shadow-white/10' : 'shadow-lg shadow-black/20'
+        className={`glass-morphism p-6 md:p-8 rounded-2xl cursor-pointer transform-gpu transition-all duration-200 ${
+          isHovered 
+            ? theme === 'light' 
+              ? 'shadow-2xl shadow-gray-900/30' 
+              : 'shadow-2xl shadow-white/10'
+            : theme === 'light' 
+              ? 'shadow-lg shadow-gray-900/20' 
+              : 'shadow-lg shadow-black/20'
         }`}
         style={{
           transform: transform,
@@ -80,13 +85,13 @@ const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
         onMouseLeave={handleMouseLeave}
       >
         {/* Enhanced background on hover */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-xl transition-opacity duration-200 ${
+        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl transition-opacity duration-200 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`} />
         
         {/* Glare overlay */}
         <div
-          className="absolute inset-0 pointer-events-none rounded-xl z-10"
+          className="absolute inset-0 pointer-events-none rounded-2xl z-10"
           style={{
             ...glareStyle,
             transition: 'opacity 0.3s ease-out'
@@ -94,33 +99,46 @@ const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
         />
         
         {/* Reflection gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-xl pointer-events-none" />
-        
-        <div className="relative z-20 transform-gpu" style={{ transform: 'translateZ(20px)' }}>
-          <h3 className={`text-xl font-bold mb-2 transition-colors duration-200 ${
-            isHovered && theme === 'dark' ? 'text-white' : theme === 'light' ? 'text-gray-800' : 'text-gray-100'
-          }`}>{exp.title}</h3>
-          <p className={`mb-2 transition-colors duration-200 ${
-            isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
-          }`}>{exp.company}</p>
-          <p className={`text-sm mb-4 transition-colors duration-200 ${
-            isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-500'
-          }`}>{exp.period}</p>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-2xl pointer-events-none" />
+          <div className="relative z-20 transform-gpu" style={{ transform: 'translateZ(20px)' }}>
+          <div className="flex flex-col md:flex-row md:justify-between mb-4">
+            <div>
+              <h3 className={`text-2xl font-semibold mb-1 transition-colors duration-200 ${
+                isHovered && theme === 'dark' ? 'text-white' : theme === 'light' ? 'text-gray-800' : 'text-gray-100'
+              }`}>{exp.title}</h3>
+              <p className={`mb-2 transition-colors duration-200 ${
+                isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
+              }`}>{exp.company}</p>
+            </div>
+            <div className={`md:text-right transition-colors duration-200 ${
+              isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
+            }`}>{exp.period}</div>
+          </div>
+          
           <p className={`mb-4 transition-colors duration-200 ${
             isHovered ? 'text-gray-200' : theme === 'light' ? 'text-gray-700' : 'text-gray-300'
           }`}>{exp.description}</p>
-          <div className="flex flex-wrap gap-2">
-            {exp.skills.map((skill) => (
-              <span
-                key={skill}
-                className={`px-3 py-1 bg-white/10 rounded-full text-sm transition-all duration-200 ${
-                  isHovered ? 'scale-105 bg-white/20' : ''
-                }`}
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
+          
+          {exp.skills && exp.skills.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {exp.skills.map((skill) => (
+                <span
+                  key={skill}
+                  className={`px-4 py-2 rounded-full text-sm transition-all duration-200 ${
+                    isHovered 
+                      ? theme === 'light'
+                        ? 'scale-105 bg-gray-200 !text-gray-800'
+                        : 'scale-105 bg-white/20 !text-gray-200' 
+                      : theme === 'light' 
+                        ? 'bg-gray-100 !text-gray-800' 
+                        : 'bg-white/10 !text-gray-300'
+                  }`}
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

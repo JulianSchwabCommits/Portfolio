@@ -81,8 +81,7 @@ const TiltCard = ({ item, index, theme }: { item: typeof contactInfo[0], index: 
       style={{ perspective: '1000px' }}
     >
       <div
-        ref={ref}
-        className={`relative glass-morphism rounded-xl overflow-hidden cursor-pointer transform-gpu transition-all duration-200 ${
+        ref={ref}        className={`relative glass-morphism rounded-2xl overflow-hidden cursor-pointer transform-gpu transition-all duration-200 ${
           isHovered 
             ? theme === 'light' 
               ? 'shadow-2xl shadow-gray-900/30' 
@@ -99,14 +98,13 @@ const TiltCard = ({ item, index, theme }: { item: typeof contactInfo[0], index: 
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Enhanced background on hover */}
-        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-xl transition-opacity duration-200 ${
+        {/* Enhanced background on hover */}        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl transition-opacity duration-200 ${
           isHovered ? 'opacity-100' : 'opacity-0'
         }`} />
         
         {/* Glare overlay */}
         <div
-          className="absolute inset-0 pointer-events-none rounded-xl z-10"
+          className="absolute inset-0 pointer-events-none rounded-2xl z-10"
           style={{
             ...glareStyle,
             transition: 'opacity 0.3s ease-out'
@@ -114,7 +112,7 @@ const TiltCard = ({ item, index, theme }: { item: typeof contactInfo[0], index: 
         />
         
         {/* Reflection gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-2xl pointer-events-none" />
         
         <a 
           href={item.href} 
@@ -158,7 +156,6 @@ const Contact = () => {
     
     return () => window.removeEventListener('resize', check_mobile);
   }, []);
-
   useEffect(() => {
     const handle_scroll = () => {
       // Check if we've scrolled past the very top (around 50px)
@@ -167,19 +164,15 @@ const Contact = () => {
 
     if (is_mobile) {
       window.addEventListener('scroll', handle_scroll);
-      document.body.style.overflow = 'auto';
-    } else {
-      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       window.removeEventListener('scroll', handle_scroll);
-      document.body.style.overflow = 'auto';
     };
   }, [is_mobile]);
 
   return (
-    <div className={`min-h-screen p-8 ${!is_mobile ? 'overflow-hidden' : ''}`}>
+    <div className="min-h-screen p-8">
       {/* Sticky title that appears when scrolled */}
       <AnimatePresence>
         {is_scrolled && is_mobile && (
@@ -196,7 +189,7 @@ const Contact = () => {
       </AnimatePresence>
       
       <PageTransition>
-        <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-12 pb-20">
+        <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
           <motion.div 
             className="flex flex-col items-center justify-center text-center mb-8"
             initial="hidden"

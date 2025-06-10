@@ -65,7 +65,11 @@ const SearchButton = ({ onClick }: { onClick: () => void }) => {
         onMouseLeave={() => set_is_hovering(false)}
         className="relative"
       >
-        <button className={`p-4 glass-morphism rounded-full cursor-pointer hover:bg-white/10 transition-all duration-200 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+        <button className={`p-4 glass-morphism rounded-full cursor-pointer transition-all duration-200 transform-gpu ${
+          theme === 'light' 
+            ? 'text-gray-800 hover:bg-gray-100 shadow-lg shadow-gray-900/20 hover:shadow-xl hover:shadow-gray-900/30' 
+            : 'text-white hover:bg-white/10 shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-white/10'
+        }`}>
           <span className="text-sm">{get_button_text()}</span>
         </button>
         
@@ -96,7 +100,7 @@ const SearchPopup = () => {
   const [experiences, set_experiences] = useState<SearchItem[]>([]);
   const [show_chatbot, set_show_chatbot] = useState(false);
   const [chatbot_query, set_chatbot_query] = useState('');
-  const { set_theme } = use_theme();
+  const { set_theme, theme } = use_theme();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -264,7 +268,14 @@ const SearchPopup = () => {
               className="w-full max-w-lg p-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="glass-morphism rounded-xl p-4" style={{ height: '480px', display: 'flex', flexDirection: 'column' }}>
+              <div className="glass-morphism rounded-2xl p-4 transform-gpu transition-all duration-200" style={{ 
+                height: '480px', 
+                display: 'flex', 
+                flexDirection: 'column',
+                boxShadow: theme === 'light' 
+                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.3)' 
+                  : '0 25px 50px -12px rgba(255, 255, 255, 0.1)'
+              }}>
                 <input
                   type="text"
                   value={search}
@@ -274,7 +285,11 @@ const SearchPopup = () => {
                   }}
                   onKeyDown={handle_keydown}
                   placeholder="Search for pages, themes, projects, or experiences..."
-                  className="w-full bg-transparent text-white placeholder-[#9ca3af] outline-none text-lg py-2 border-b border-white/20 focus:border-white/40 transition-colors duration-200"
+                  className={`w-full bg-transparent outline-none text-lg py-2 border-b transition-all duration-200 ${
+                    theme === 'light' 
+                      ? 'text-gray-800 placeholder-gray-500 border-gray-300 focus:border-gray-600' 
+                      : 'text-white placeholder-gray-400 border-white/20 focus:border-white/40'
+                  }`}
                   autoFocus
                 />
                 
@@ -286,23 +301,47 @@ const SearchPopup = () => {
                     {filtered_results.map((result, index) => {
                       const should_show_condensed = filtered_results.length > 2;
                       const show_description = !should_show_condensed || hovered_index === index || selected_index === index;
+                      const is_active = index === selected_index;
                       
                       return (
                         <div
                           key={`${result.type}-${result.id}`}
-                          className={`p-3 rounded cursor-pointer transition-all duration-200 ${
-                            index === selected_index 
-                              ? 'border border-white/20 bg-white/5' 
+                          className={`relative p-3 rounded-2xl cursor-pointer transition-all duration-200 ${
+                            theme === 'light'
+                              ? 'border border-transparent hover:bg-gray-50/50'
                               : 'border border-transparent hover:bg-white/5'
                           }`}
                           onClick={() => handle_selection(result)}
                           onMouseEnter={() => set_hovered_index(index)}
                           onMouseLeave={() => set_hovered_index(-1)}
                         >
-                          <div className="flex items-center justify-between">
+                          {/* Animated selector indicator */}
+                          {is_active && (
+                            <motion.div 
+                              layoutId="search-result-indicator" 
+                              className={`absolute inset-0 rounded-2xl ${
+                                theme === 'light'
+                                  ? 'border border-gray-300 bg-gray-100 shadow-sm shadow-gray-900/10' 
+                                  : 'border border-white/20 bg-white/5 shadow-sm shadow-black/20'
+                              }`}
+                              initial={false}
+                              transition={{
+                                type: "spring",
+                                bounce: 0.2,
+                                duration: 0.6
+                              }}
+                            />
+                          )}                          
+                          <div className="relative z-10 flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <span className="text-white font-medium">{result.title}</span>
-                              <span className="text-xs text-[#9ca3af] px-2 py-0.5 bg-gray-800/30 rounded">
+                              <span className={`font-medium ${
+                                theme === 'light' ? 'text-gray-800' : 'text-white'
+                              }`}>{result.title}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded ${
+                                theme === 'light' 
+                                  ? 'text-gray-600 bg-gray-200' 
+                                  : 'text-gray-300 bg-gray-800/30'
+                              }`}>
                                 {result.type.charAt(0).toUpperCase() + result.type.slice(1)}
                               </span>
                             </div>
@@ -310,7 +349,9 @@ const SearchPopup = () => {
                           
                           {/* Show description based on conditions */}
                           {result.description && show_description && (
-                            <div className="mt-2 text-sm text-[#9ca3af] leading-relaxed">
+                            <div className={`relative z-10 mt-2 text-sm leading-relaxed ${
+                              theme === 'light' ? 'text-gray-600' : 'text-gray-300'
+                            }`}>
                               {should_show_condensed && result.description.length > 100 
                                 ? `${result.description.substring(0, 100)}...` 
                                 : result.description}
@@ -319,14 +360,18 @@ const SearchPopup = () => {
                           
                           {/* Show period for experiences */}
                           {result.period && show_description && (
-                            <div className="mt-1 text-xs text-[#9ca3af]">
+                            <div className={`relative z-10 mt-1 text-xs ${
+                              theme === 'light' ? 'text-gray-500' : 'text-gray-400'
+                            }`}>
                               {result.period}
                             </div>
                           )}
                           
                           {/* Show hover/navigation hint for condensed view */}
                           {result.description && should_show_condensed && !show_description && (
-                            <div className="mt-2 text-xs text-gray-500 italic">
+                            <div className={`relative z-10 mt-2 text-xs italic ${
+                              theme === 'light' ? 'text-gray-400' : 'text-gray-500'
+                            }`}>
                               Hover or use ↑↓ to see description
                             </div>
                           )}
@@ -337,8 +382,12 @@ const SearchPopup = () => {
                 ) : search.trim() ? (
                   <div className="mt-2 p-4 text-center flex-1 flex items-center justify-center flex-col" style={{ height: '320px' }}>
                     <div className="text-center">
-                      <p className="text-white/70 text-lg mb-2">No results found</p>
-                      <p className="text-white/50 text-sm mb-4">Try searching for pages, projects, experiences, or themes</p>
+                      <p className={`text-lg mb-2 ${
+                        theme === 'light' ? 'text-gray-600' : 'text-white/70'
+                      }`}>No results found</p>
+                      <p className={`text-sm mb-4 ${
+                        theme === 'light' ? 'text-gray-500' : 'text-white/50'
+                      }`}>Try searching for pages, projects, experiences, or themes</p>
                       
                       <button
                         onClick={() => {
@@ -346,7 +395,11 @@ const SearchPopup = () => {
                           set_show_chatbot(true);
                           set_is_open(false);
                         }}
-                        className="px-6 py-2 rounded-full bg-black text-white border border-gray-700 shadow-lg transition-all duration-300 hover:bg-[#e5e7eb] hover:text-black mx-auto mt-2"
+                        className={`px-6 py-2 rounded-2xl transition-all duration-300 ${
+                          theme === 'light'
+                            ? 'bg-gray-800 text-white hover:bg-gray-700 shadow-lg shadow-gray-900/20 hover:shadow-xl hover:shadow-gray-900/30'
+                            : 'bg-white/10 text-white hover:bg-white/20 shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-white/10'
+                        } mx-auto mt-2`}
                       >
                         Ask AI about "{search}"
                       </button>
@@ -355,13 +408,21 @@ const SearchPopup = () => {
                 ) : (
                   <div className="mt-2 p-4 text-center flex-1 flex items-center justify-center" style={{ height: '320px' }}>
                     <div className="text-center">
-                      <p className="text-white/70 text-lg mb-2">Start typing to search</p>
-                      <p className="text-white/50 text-sm">Find pages, projects, experiences, and themes</p>
+                      <p className={`text-lg mb-2 ${
+                        theme === 'light' ? 'text-gray-600' : 'text-white/70'
+                      }`}>Start typing to search</p>
+                      <p className={`text-sm ${
+                        theme === 'light' ? 'text-gray-500' : 'text-white/50'
+                      }`}>Find pages, projects, experiences, and themes</p>
                     </div>
                   </div>
                 )}
                 
-                <div className="mt-2 text-sm text-[#9ca3af] border-t border-white/10 pt-2 flex justify-between">
+                <div className={`mt-2 text-sm border-t pt-2 flex justify-between ${
+                  theme === 'light' 
+                    ? 'text-gray-600 border-gray-300' 
+                    : 'text-gray-400 border-white/10'
+                }`}>
                   <span>Press Enter to select, ↑↓ to navigate</span>
                 </div>
               </div>
