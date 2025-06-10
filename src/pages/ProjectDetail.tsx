@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../utils/supabase';
@@ -15,6 +15,102 @@ interface Project {
   demo_url?: string;
   image_url?: string;
 }
+
+// Custom hook for 3D tilt effect
+const use3DTilt = () => {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const [transform, setTransform] = useState('');
+  const [glareStyle, setGlareStyle] = useState({});
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+
+    const rect = ref.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Calculate rotation based on mouse position relative to center
+    const rotateY = ((x - centerX) / centerX) * 15; // Left/Right tilt
+    const rotateX = ((y - centerY) / centerY) * -15; // Up/Down tilt (inverted for natural feel)
+    
+    // Calculate glare position
+    const glareX = (x / rect.width) * 100;
+    const glareY = (y / rect.height) * 100;
+    
+    setTransform(`rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`);
+    setGlareStyle({
+      background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 40%, transparent 70%)`,
+      opacity: 1
+    });
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setTransform('rotateX(0deg) rotateY(0deg) scale(1)');
+    setGlareStyle({ opacity: 0 });
+    setIsHovered(false);
+  };
+
+  return { ref, transform, glareStyle, handleMouseMove, handleMouseLeave, isHovered };
+};
+
+// Tilt Button Component
+const TiltButton = ({ href, children, theme }: { href: string, children: React.ReactNode, theme: string }) => {
+  const { ref, transform, glareStyle, handleMouseMove, handleMouseLeave, isHovered } = use3DTilt();
+
+  return (
+    <div className="perspective-1000" style={{ perspective: '1000px' }}>
+      <a
+        ref={ref}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"        className={`relative block px-6 py-3 rounded-lg transition-all duration-200 text-lg transform-gpu overflow-hidden ${
+          theme === 'light' 
+            ? 'bg-gray-800 text-white hover:bg-gray-700' 
+            : 'bg-white/10 hover:bg-white/20 text-white'
+        } ${isHovered 
+            ? theme === 'light' 
+              ? 'shadow-2xl shadow-gray-900/30' 
+              : 'shadow-2xl shadow-white/10'
+            : theme === 'light' 
+              ? 'shadow-lg shadow-gray-900/20' 
+              : 'shadow-lg shadow-black/20'
+        }`}
+        style={{
+          transform: transform,
+          transition: 'transform 0.15s ease-out, box-shadow 0.2s ease-out',
+          transformStyle: 'preserve-3d'
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Enhanced background on hover */}
+        <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-lg transition-opacity duration-200 ${
+          isHovered ? 'opacity-100' : 'opacity-0'
+        }`} />
+        
+        {/* Glare overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none rounded-lg z-10"
+          style={{
+            ...glareStyle,
+            transition: 'opacity 0.3s ease-out'
+          }}
+        />
+        
+        {/* Reflection gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/10 rounded-lg pointer-events-none" />
+          <span className="relative z-20 transform-gpu text-white" style={{ transform: 'translateZ(20px)' }}>
+          {children}
+        </span>
+      </a>
+    </div>
+  );
+};
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -85,41 +181,21 @@ const ProjectDetail = () => {
             >
               <h1 className="text-5xl md:text-6xl font-serif mb-2">{project.title}</h1>
               <p className="text-2xl text-gray-400">{project.year}</p>
-            </motion.div>
-
-            <motion.div
+            </motion.div>            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               className="flex gap-4 mt-4 md:mt-0"
             >
               {project.github_url && (
-                <a
-                  href={project.github_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`px-6 py-3 rounded-lg transition-colors text-lg ${
-                    theme === 'light' 
-                      ? 'bg-gray-800 text-white hover:bg-gray-700' 
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
+                <TiltButton href={project.github_url} theme={theme}>
                   View on GitHub
-                </a>
+                </TiltButton>
               )}
               {project.demo_url && (
-                <a
-                  href={project.demo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`px-6 py-3 rounded-lg transition-colors text-lg ${
-                    theme === 'light' 
-                      ? 'bg-gray-800 text-white hover:bg-gray-700' 
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
+                <TiltButton href={project.demo_url} theme={theme}>
                   Live Demo
-                </a>
+                </TiltButton>
               )}
             </motion.div>
           </div>

@@ -3,8 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { use_theme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
-import { Send, Sun, Moon } from 'lucide-react';
-import ChatbotPopup from './ChatbotPopup';
 
 interface SearchItem {
   id: number;
@@ -14,12 +12,6 @@ interface SearchItem {
   period?: string;
   description?: string;
   skills?: string[];
-}
-
-interface Message {
-  id: number;
-  text: string;
-  sender: "user" | "bot";
 }
 
 const use_device_info = () => {
@@ -44,25 +36,6 @@ const use_device_info = () => {
 
   return { is_mobile, is_mac };
 };
-const ThemeToggle = () => {
-  const { theme, toggle_theme } = use_theme();
-  
-  return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation();
-        toggle_theme();
-      }}
-      className="absolute bottom-2 right-3 p-2 rounded-full hover:bg-white/10 transition-all duration-200 cursor-pointer"
-    >
-      {theme === 'light' ? 
-        <Moon className="w-5 h-5 text-white" /> : 
-        <Sun className="w-5 h-5" />
-      }
-    </div>
-  );
-};
-
 const SearchButton = ({ onClick }: { onClick: () => void }) => {
   const [is_hovering, set_is_hovering] = useState(false);
   const { theme } = use_theme();
@@ -117,9 +90,9 @@ const SearchPopup = () => {
   const [is_open, set_is_open] = useState(false);
   const [search, set_search] = useState('');
   const [selected_index, set_selected_index] = useState(0);
+  const [hovered_index, set_hovered_index] = useState(-1);
   const [projects, set_projects] = useState<SearchItem[]>([]);
   const [experiences, set_experiences] = useState<SearchItem[]>([]);
-  const [show_chatbot, set_show_chatbot] = useState(false);
   const { set_theme } = use_theme();
   const navigate = useNavigate();
 
@@ -166,25 +139,50 @@ const SearchPopup = () => {
     { id: 5, title: 'Contact', type: 'route' }
   ];
 
-  const additional_results: SearchItem[] = [
-    { id: 6, title: 'Admin', type: 'route' }
-  ];
-
   const get_filtered_results = () => {
-    const search_lower = search.toLowerCase();
+    const search_lower = search.toLowerCase().trim();
+    
+    // Show theme options when searching for theme-related terms
+    if (search_lower === 'light' || search_lower === 'light mode') {
+      return [{ id: 999, title: 'Light Mode', type: 'theme' as const, description: 'Switch to light theme' }];
+    }
+    
+    if (search_lower === 'dark' || search_lower === 'dark mode') {
+      return [{ id: 998, title: 'Dark Mode', type: 'theme' as const, description: 'Switch to dark theme' }];
+    }
+    
+    // Show both theme options when searching for general theme terms
+    if (search_lower === 'theme' || search_lower === 'mode') {
+      return [
+        { id: 999, title: 'Light Mode', type: 'theme' as const, description: 'Switch to light theme' },
+        { id: 998, title: 'Dark Mode', type: 'theme' as const, description: 'Switch to dark theme' }
+      ];
+    }
     
     if (!search) {
       return static_results;
     }
-
-    // Add Admin to results only when searched for
-    const admin_results = search_lower.includes('admin') ? additional_results : [];
+    
+    const matches_search = (item: SearchItem) => {
+      // Check title
+      if (item.title.toLowerCase().includes(search_lower)) return true;
+      
+      // Check description
+      if (item.description && item.description.toLowerCase().includes(search_lower)) return true;
+      
+      // Check skills/tags
+      if (item.skills && item.skills.some(skill => skill.toLowerCase().includes(search_lower))) return true;
+      
+      // Check company for experiences
+      if (item.company && item.company.toLowerCase().includes(search_lower)) return true;
+      
+      return false;
+    };
     
     return [
-      ...static_results.filter(item => item.title.toLowerCase().includes(search_lower)),
-      ...admin_results,
-      ...projects.filter(item => item.title.toLowerCase().includes(search_lower)),
-      ...experiences.filter(item => item.title.toLowerCase().includes(search_lower))
+      ...static_results.filter(matches_search),
+      ...projects.filter(matches_search),
+      ...experiences.filter(matches_search)
     ];
   };
 
@@ -197,14 +195,9 @@ const SearchPopup = () => {
         set_is_open(true);
         set_search('');
       }
-      if (e.ctrlKey && e.key === 'i') {
-        e.preventDefault();
-        set_show_chatbot(true);
-      }
       if (e.key === 'Escape') {
         set_is_open(false);
         set_search('');
-        set_show_chatbot(false);
       }
     };
 
@@ -223,9 +216,6 @@ const SearchPopup = () => {
       e.preventDefault();
       const selected_item = filtered_results[selected_index];
       handle_selection(selected_item);
-    } else if (e.key === 'Enter' && filtered_results.length === 0 && search.trim()) {
-      e.preventDefault();
-      set_show_chatbot(true);
     }
   };
 
@@ -253,17 +243,17 @@ const SearchPopup = () => {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
             onClick={() => {
               set_is_open(false);
-              set_show_chatbot(false);
             }}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               className="w-full max-w-lg p-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="glass-morphism rounded-xl p-4">
+              <div className="glass-morphism rounded-xl p-4" style={{ height: '480px', display: 'flex', flexDirection: 'column' }}>
                 <input
                   type="text"
                   value={search}
@@ -273,82 +263,92 @@ const SearchPopup = () => {
                   }}
                   onKeyDown={handle_keydown}
                   placeholder="Search for pages, themes, projects, or experiences..."
-                  className="w-full bg-transparent text-white placeholder-[#9ca3af] outline-none"
+                  className="w-full bg-transparent text-white placeholder-[#9ca3af] outline-none text-lg py-2 border-b border-white/20 focus:border-white/40 transition-colors duration-200"
                   autoFocus
                 />
                 
-                {/* Theme Toggle */}
-                <div className="mt-2 border-t border-white/10 pt-2">
-                  <ThemeToggle />
-                </div>
-                
                 {filtered_results.length > 0 ? (
-                  <div className="mt-2 space-y-1">
-                    {filtered_results.map((result, index) => (
-                      <div
-                        key={`${result.type}-${result.id}`}
-                        className={`p-2 rounded cursor-pointer transition-colors ${
-                          index === selected_index 
-                            ? 'border border-white/20' 
-                            : 'border border-transparent'
-                        }`}
-                        onClick={() => handle_selection(result)}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-white">{result.title}</span>
-                          <span className="text-xs text-[#9ca3af]">
-                            {result.type.charAt(0).toUpperCase() + result.type.slice(1)}
-                          </span>
-                        </div>
-                        {(result.description || result.skills) && (
-                          <div className="mt-1 text-xs text-[#9ca3af]">
-                            {result.description && <div>{result.description}</div>}
-                            {result.skills && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {result.skills.map(skill => (
-                                  <span key={skill} className="px-1 py-0.5 bg-gray-800/50 rounded">
-                                    {skill}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
+                  <div 
+                    className="mt-2 flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar" 
+                    style={{ height: '320px' }}
+                  >
+                    {filtered_results.map((result, index) => {
+                      const should_show_condensed = filtered_results.length > 2;
+                      const show_description = !should_show_condensed || hovered_index === index || selected_index === index;
+                      
+                      return (
+                        <div
+                          key={`${result.type}-${result.id}`}
+                          className={`p-3 rounded cursor-pointer transition-all duration-200 ${
+                            index === selected_index 
+                              ? 'border border-white/20 bg-white/5' 
+                              : 'border border-transparent hover:bg-white/5'
+                          }`}
+                          onClick={() => handle_selection(result)}
+                          onMouseEnter={() => set_hovered_index(index)}
+                          onMouseLeave={() => set_hovered_index(-1)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-white font-medium">{result.title}</span>
+                              <span className="text-xs text-[#9ca3af] px-2 py-0.5 bg-gray-800/30 rounded">
+                                {result.type.charAt(0).toUpperCase() + result.type.slice(1)}
+                              </span>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    ))}
+                          
+                          {/* Show description based on conditions */}
+                          {result.description && show_description && (
+                            <div className="mt-2 text-sm text-[#9ca3af] leading-relaxed">
+                              {should_show_condensed && result.description.length > 100 
+                                ? `${result.description.substring(0, 100)}...` 
+                                : result.description}
+                            </div>
+                          )}
+                          
+                          {/* Show period for experiences */}
+                          {result.period && show_description && (
+                            <div className="mt-1 text-xs text-[#9ca3af]">
+                              {result.period}
+                            </div>
+                          )}
+                          
+                          {/* Show hover/navigation hint for condensed view */}
+                          {result.description && should_show_condensed && !show_description && (
+                            <div className="mt-2 text-xs text-gray-500 italic">
+                              Hover or use ↑↓ to see description
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : search.trim() ? (
-                  <div className="mt-2 p-4 text-center">
-                    <p className="text-white mb-2">No results found</p>
-                    <button 
-                      onClick={() => set_show_chatbot(true)}
-                      className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors"
-                    >
-                      Ask AI about "{search}"
-                    </button>
+                  <div className="mt-2 p-4 text-center flex-1 flex items-center justify-center" style={{ height: '320px' }}>
+                    <div className="text-center">
+                      <p className="text-white/70 text-lg mb-2">No results found</p>
+                      <p className="text-white/50 text-sm">Try searching for pages, projects, experiences, or themes</p>
+                    </div>
                   </div>
-                ) : null}
+                ) : (
+                  <div className="mt-2 p-4 text-center flex-1 flex items-center justify-center" style={{ height: '320px' }}>
+                    <div className="text-center">
+                      <p className="text-white/70 text-lg mb-2">Start typing to search</p>
+                      <p className="text-white/50 text-sm">Find pages, projects, experiences, and themes</p>
+                    </div>
+                  </div>
+                )}
                 
-                <div className="mt-2 text-sm text-[#9ca3af]">
-                  Press Enter to select, ↑↓ to navigate
+                <div className="mt-2 text-sm text-[#9ca3af] border-t border-white/10 pt-2 flex justify-between">
+                  <span>Press Enter to select, ↑↓ to navigate</span>
                 </div>
               </div>
             </motion.div>
           </motion.div>
-        )}
-        {show_chatbot && (
-          <ChatbotPopup 
-            initialMessage={search}
-            onClose={() => {
-              set_show_chatbot(false);
-              set_is_open(false);
-              set_search('');
-            }} 
-          />
         )}
       </AnimatePresence>
     </>
   );
 };
 
-export default SearchPopup; 
+export default SearchPopup;

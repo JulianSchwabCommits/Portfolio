@@ -13,11 +13,10 @@ import NotFound from "./pages/NotFound";
 import CursorShadow from "./components/CursorShadow";
 import SearchPopup from "./components/SearchPopup";
 import { ThemeProvider } from "./context/ThemeContext";
+import { ChatProvider } from "./context/ChatContext";
 import ProjectDetail from "./pages/ProjectDetail";
 import ExperienceDetail from './pages/ExperienceDetail';
-import Admin from './pages/Admin';
-import { AnalyticsInit } from './components/AnalyticsInit';
-import Login from './pages/Login';
+import usePageTitle from "./hooks/use-page-title";
 
 const queryClient = new QueryClient();
 
@@ -33,32 +32,36 @@ const AnimatedRoutes = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/experiences/:id" element={<ExperienceDetail />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/login" element={<Login />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="relative">
-            <CursorShadow />
-            <Navbar />
-            <SearchPopup />
-            <AnalyticsInit />
-            <AnimatedRoutes />
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Use the page title hook
+  usePageTitle();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <ChatProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <div className="relative">
+                <CursorShadow />
+                <Navbar />
+                <SearchPopup />
+                <AnimatedRoutes />
+              </div>
+            </BrowserRouter>
+          </TooltipProvider>
+        </ChatProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -80,6 +80,7 @@ const Play = () => {
             {projects.map((project) => (
               <ProjectCard
                 key={project.id}
+                id={project.id}
                 title={project.title}
                 description={project.description}
                 year={project.year}
