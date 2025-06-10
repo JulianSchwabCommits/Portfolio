@@ -116,35 +116,6 @@ const TiltImage = ({ src, alt }: { src: string; alt: string }) => {
 const About = () => {
   const [about_data, set_about_data] = useState<AboutData[]>([]);
   const [loading, set_loading] = useState(true);
-  const [is_mobile, set_is_mobile] = useState(false);
-  const [is_scrolled, set_is_scrolled] = useState(false);
-
-  useEffect(() => {
-    const check_mobile = () => {
-      set_is_mobile(window.innerWidth < 768);
-    };
-    
-    check_mobile();
-    window.addEventListener('resize', check_mobile);
-    
-    return () => window.removeEventListener('resize', check_mobile);
-  }, []);
-
-  useEffect(() => {
-    const handle_scroll = () => {
-      // Check if we've scrolled past the title area (around 200px)
-      set_is_scrolled(window.scrollY > 200);
-    };
-
-    if (is_mobile) {
-      window.addEventListener('scroll', handle_scroll);
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handle_scroll);
-    };
-  }, [is_mobile]);
-
   useEffect(() => {
     const fetch_about = async () => {
       try {
@@ -165,24 +136,8 @@ const About = () => {
 
     fetch_about();
   }, []);
-
   return (
     <PageTransition>
-      {/* Sticky title that appears when scrolled */}
-      <AnimatePresence>
-        {is_scrolled && is_mobile && (
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.3 }}
-            className="fixed top-4 left-4 z-50 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/10"
-          >
-            <h2 className="text-lg font-serif text-white">About Me</h2>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
       <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
         <motion.div 
           initial="hidden" 
