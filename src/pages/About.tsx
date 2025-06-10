@@ -7,21 +7,10 @@ import { use_theme } from "../context/ThemeContext";
 interface AboutData {
   id: number;
   text: string;
+  type: 'title' | 'description';
 }
 
-// Fallback about data
-const fallbackAboutData: AboutData[] = [
-  {
-    id: 1,
-    text: `Hello! I'm Julian, a passionate developer with a deep love for creating innovative solutions and exploring the endless possibilities of technology.
 
-My journey began with web development, where I discovered my fascination with building responsive and modern web experiences using React, TypeScript, and TailwindCSS. From there, I've expanded into the exciting world of artificial intelligence and machine learning, working on projects that leverage Python, TensorFlow, and PyTorch to solve real-world problems.
-
-Currently, I'm working at Swisscom on the Apps Team, where I design and implement AI-powered features that enhance business automation and decision-making. I'm also continuously learning from 'Hands-On Machine Learning' while applying these concepts to personal projects.
-
-When I'm not coding, you can find me kiteboarding on the water, exploring the great outdoors, or diving into the latest tech trends. I believe in the power of continuous learning and am always excited to take on new challenges that push the boundaries of what's possible.`
-  }
-];
 
 // Custom hook for 3D tilt effect
 const use3DTilt = () => {
@@ -116,7 +105,22 @@ const TiltImage = ({ src, alt }: { src: string; alt: string }) => {
 const About = () => {
   const [about_data, set_about_data] = useState<AboutData[]>([]);
   const [loading, set_loading] = useState(true);
+  const [temperature, set_temperature] = useState<number | null>(null);
+  
   useEffect(() => {
+    const fetch_temperature = async () => {
+      try {
+        const response = await fetch("https://api.open-meteo.com/v1/forecast?latitude=47.3769&longitude=8.5417&current=temperature_2m");
+        const data = await response.json();
+        set_temperature(data.current.temperature_2m);
+      } catch (err) {
+        console.error("Failed to fetch temperature data:", err);
+      }
+    };
+    
+    fetch_temperature();
+  }, []);
+    useEffect(() => {
     const fetch_about = async () => {
       try {
         const { data, error } = await supabase
@@ -125,10 +129,10 @@ const About = () => {
           .order('id', { ascending: true });
 
         if (error) throw error;
-        set_about_data(data && data.length > 0 ? data : fallbackAboutData);
+        set_about_data(data || []);
       } catch (err) {
-        console.warn('Failed to fetch about data from Supabase, using fallback data:', err);
-        set_about_data(fallbackAboutData);
+        console.warn('Failed to fetch about data from Supabase:', err);
+        set_about_data([]);
       } finally {
         set_loading(false);
       }
@@ -136,6 +140,25 @@ const About = () => {
 
     fetch_about();
   }, []);
+  
+  const renderContent = (item: AboutData) => {
+    if (item.type === 'title') {
+      // Replace {temp} placeholder with actual temperature
+      const processedText = item.text.replace('{temp}', temperature !== null ? `${temperature}°C` : '...');
+      return (
+        <h2 key={item.id} className="text-2xl md:text-3xl font-serif mb-4 text-gray-100">
+          {processedText}
+        </h2>
+      );
+    } else {
+      return (
+        <p key={item.id} className="text-lg text-gray-300 whitespace-pre-line">
+          {item.text}
+        </p>
+      );
+    }
+  };
+  
   return (
     <PageTransition>
       <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
@@ -175,8 +198,7 @@ const About = () => {
             About Me
           </motion.h1>
         </motion.div>
-        
-        <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
             {loading ? (
               <div className="text-center">Loading...</div>
@@ -188,11 +210,7 @@ const About = () => {
                   transition={{ duration: 0.7, delay: 0.2 }}
                   className="space-y-6"
                 >
-                  {about_data.map((item) => (
-                    <p key={item.id} className="text-lg text-gray-300 whitespace-pre-line">
-                      {item.text}
-                    </p>
-                  ))}
+                  {about_data.map((item) => renderContent(item))}
                 </motion.div>
                 
                 <motion.div 
@@ -205,7 +223,20 @@ const About = () => {
                   <TiltImage src="/kiting.jpg" alt="Julian kiteboarding" />
                 </motion.div>
               </>
-            ) : null}
+            ) : (
+              <div className="col-span-full text-center">
+                <p className="text-xl text-gray-300 mb-4">Cannot connect to server</p>
+                <p className="text-lg text-gray-400">
+                  Contact Julian under{" "}
+                  <a 
+                    href="mailto:me@julianschwab.dev" 
+                    className="text-blue-400 hover:text-blue-300 underline"
+                  >
+                    me@julianschwab.dev
+                  </a>
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

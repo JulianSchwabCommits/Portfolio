@@ -70,11 +70,21 @@ const Play = () => {
             Personal Projects
           </motion.h1>
         </motion.div>
-        
-        {loading ? (
+          {loading ? (
           <div className="text-center">Loading...</div>
-        ) : error ? (
-          <div className="text-center text-red-500">Error: {error}</div>
+        ) : error || projects.length === 0 ? (
+          <div className="text-center">
+            <p className="text-xl text-gray-300 mb-4">Cannot connect to server</p>
+            <p className="text-lg text-gray-400">
+              Contact Julian under{" "}
+              <a 
+                href="mailto:me@julianschwab.dev" 
+                className="text-blue-400 hover:text-blue-300 underline"
+              >
+                me@julianschwab.dev
+              </a>
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {projects.map((project) => (

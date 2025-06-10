@@ -36,9 +36,24 @@ const Play = () => {
 
     fetch_projects();
   }, []);
-
   if (loading) return <div className="text-center">Loading...</div>;
-  if (error) return <div className="text-center text-red-500">Error: {error}</div>;
+  
+  if (error || projects.length === 0) {
+    return (
+      <div className="text-center">
+        <p className="text-xl text-gray-300 mb-4">Cannot connect to server</p>
+        <p className="text-lg text-gray-400">
+          Contact Julian under{" "}
+          <a 
+            href="mailto:me@julianschwab.dev" 
+            className="text-blue-400 hover:text-blue-300 underline"
+          >
+            me@julianschwab.dev
+          </a>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

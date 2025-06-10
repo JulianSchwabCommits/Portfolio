@@ -12,57 +12,7 @@ interface Experience {
   skills: string[];
 }
 
-// Fallback experience data
-const fallbackExperiences: Experience[] = [
-  {
-    id: 1,
-    title: "AI Development",
-    company: "Apps Team, @Swisscom",
-    period: "2024-Present",
-    description: "Designing and implementing AI-powered features at Apps Team to enhance business automation and decision-making.",
-    skills: ["Python", "Machine Learning", "Ollama", "aws-bedrock"]
-  },
-  {
-    id: 2,
-    title: "Machine Learning Development",
-    company: "Personal",
-    period: "2024-Present",
-    description: "Exploring and implementing machine learning models for predictive analytics and automation. Learning from 'Hands-On Machine Learning' while applying concepts to real-world projects.",
-    skills: ["Python", "scikit-learn", "TensorFlow", "PyTorch", "Pandas", "NumPy", "Matplotlib"]
-  },
-  {
-    id: 3,
-    title: "RPA Development",
-    company: "Swisscom",
-    period: "2023-2024",
-    description: "Automating business processes using UiPath RPA platform.",
-    skills: ["RPA", "UiPath Studio", "UiPath Orchestrator", "Automations"]
-  },
-  {
-    id: 4,
-    title: "Game Development",
-    company: "Personal",
-    period: "2023-2024",
-    description: "Creating immersive 3D experiences with Unreal Engine 5.",
-    skills: ["Unreal Engine", "C++", "Blender"]
-  },
-  {
-    id: 5,
-    title: "Python Games",
-    company: "Personal",
-    period: "2022-2024",
-    description: "Collection of interactive Python games using Pygame.",
-    skills: ["Python", "Pygame"]
-  },
-  {
-    id: 6,
-    title: "Web Development",
-    company: "Personal",
-    period: "2021-Present",
-    description: "Creating responsive and modern web experiences.",
-    skills: ["React", "Vite", "TailwindCSS", "HTML", "CSS", "JavaScript"]
-  }
-];
+
 
 // Custom hook for 3D tilt effect
 const use3DTilt = () => {
@@ -181,7 +131,6 @@ const Experience = () => {
   const [experiences, set_experiences] = useState<Experience[]>([]);
   const [loading, set_loading] = useState(true);
   const { theme } = use_theme();
-
   useEffect(() => {
     const fetch_experiences = async () => {
       try {
@@ -191,18 +140,37 @@ const Experience = () => {
           .order('id', { ascending: false });
 
         if (error) throw error;
-        set_experiences(data && data.length > 0 ? data : fallbackExperiences);
+        set_experiences(data || []);
       } catch (err) {
-        console.warn('Failed to fetch experiences from Supabase, using fallback data:', err);
-        set_experiences(fallbackExperiences);
+        console.warn('Failed to fetch experiences from Supabase:', err);
+        set_experiences([]);
       } finally {
         set_loading(false);
       }
     };
 
     fetch_experiences();
-  }, []);
-  if (loading) return <div className="text-center">Loading...</div>;
+  }, []);  if (loading) return <div className="text-center">Loading...</div>;
+
+  if (experiences.length === 0) {
+    return (
+      <div className="space-y-8">
+        <h2 className="text-4xl md:text-5xl font-serif text-center mb-16">Experience</h2>
+        <div className="text-center">
+          <p className="text-xl text-gray-300 mb-4">Cannot connect to server</p>
+          <p className="text-lg text-gray-400">
+            Contact Julian under{" "}
+            <a 
+              href="mailto:me@julianschwab.dev" 
+              className="text-blue-400 hover:text-blue-300 underline"
+            >
+              me@julianschwab.dev
+            </a>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
