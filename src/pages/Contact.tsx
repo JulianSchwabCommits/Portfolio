@@ -14,12 +14,6 @@ const contactInfo = [
     href: "mailto:me@julianschwab.dev"
   },
   {
-    icon: <Phone className="w-5 h-5" />,
-    label: "Phone",
-    value: "+41 77 460 46 59",
-    href: "tel:+41774604659"
-  },
-  {
     icon: <Github className="w-5 h-5" />,
     label: "GitHub",
     value: "JulianSchwabCommits",

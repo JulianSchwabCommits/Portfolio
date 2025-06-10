@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { use_theme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
+import ChatbotPopup from './ChatbotPopup';
 
 interface SearchItem {
   id: number;
@@ -93,6 +94,8 @@ const SearchPopup = () => {
   const [hovered_index, set_hovered_index] = useState(-1);
   const [projects, set_projects] = useState<SearchItem[]>([]);
   const [experiences, set_experiences] = useState<SearchItem[]>([]);
+  const [show_chatbot, set_show_chatbot] = useState(false);
+  const [chatbot_query, set_chatbot_query] = useState('');
   const { set_theme } = use_theme();
   const navigate = useNavigate();
 
@@ -212,10 +215,18 @@ const SearchPopup = () => {
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       set_selected_index(prev => Math.max(prev - 1, 0));
-    } else if (e.key === 'Enter' && filtered_results.length > 0) {
+    } else if (e.key === 'Enter') {
       e.preventDefault();
-      const selected_item = filtered_results[selected_index];
-      handle_selection(selected_item);
+      if (filtered_results.length > 0) {
+        // If we have results, select the highlighted one
+        const selected_item = filtered_results[selected_index];
+        handle_selection(selected_item);
+      } else if (search.trim()) {
+        // If we have a search term but no results, open chatbot
+        set_chatbot_query(search);
+        set_show_chatbot(true);
+        set_is_open(false);
+      }
     }
   };
 
@@ -324,10 +335,21 @@ const SearchPopup = () => {
                     })}
                   </div>
                 ) : search.trim() ? (
-                  <div className="mt-2 p-4 text-center flex-1 flex items-center justify-center" style={{ height: '320px' }}>
+                  <div className="mt-2 p-4 text-center flex-1 flex items-center justify-center flex-col" style={{ height: '320px' }}>
                     <div className="text-center">
                       <p className="text-white/70 text-lg mb-2">No results found</p>
-                      <p className="text-white/50 text-sm">Try searching for pages, projects, experiences, or themes</p>
+                      <p className="text-white/50 text-sm mb-4">Try searching for pages, projects, experiences, or themes</p>
+                      
+                      <button
+                        onClick={() => {
+                          set_chatbot_query(search);
+                          set_show_chatbot(true);
+                          set_is_open(false);
+                        }}
+                        className="px-6 py-2 rounded-full bg-black text-white border border-gray-700 shadow-lg transition-all duration-300 hover:bg-[#e5e7eb] hover:text-black mx-auto mt-2"
+                      >
+                        Ask AI about "{search}"
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -347,6 +369,14 @@ const SearchPopup = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* ChatbotPopup that appears when Ask AI button is clicked */}
+      {show_chatbot && (
+        <ChatbotPopup 
+          onClose={() => set_show_chatbot(false)} 
+          initialMessage={chatbot_query}
+        />
+      )}
     </>
   );
 };
