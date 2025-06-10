@@ -295,7 +295,7 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
                   textarea.style.borderRadius = '9999px';
                 }
               }}
-              placeholder="Ask me anything about Julian... (Press Enter to send)"
+              placeholder="Ask me anything"
               className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none transition-all duration-200 ${theme === 'light'
                 ? 'bg-gray-100 text-gray-800 placeholder-gray-500 focus:bg-gray-50 shadow-sm shadow-gray-900/10'
                 : 'bg-white/5 text-white placeholder-gray-400 focus:bg-white/10 shadow-sm shadow-black/20'
