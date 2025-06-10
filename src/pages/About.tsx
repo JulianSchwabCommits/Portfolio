@@ -39,10 +39,9 @@ const use3DTilt = () => {
     
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    
-    // Calculate rotation based on mouse position relative to center
-    const rotateY = ((x - centerX) / centerX) * 15; // Left/Right tilt
-    const rotateX = ((y - centerY) / centerY) * -15; // Up/Down tilt (inverted for natural feel)
+      // Calculate rotation based on mouse position relative to center
+    const rotateY = ((x - centerX) / centerX) * 4; // Left/Right tilt (reduced from 15)
+    const rotateX = ((y - centerY) / centerY) * -4; // Up/Down tilt (reduced from 15)
     
     // Calculate glare position
     const glareX = (x / rect.width) * 100;
