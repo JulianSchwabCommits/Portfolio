@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { use_theme } from "../context/ThemeContext";
 
@@ -12,6 +12,30 @@ interface ProjectCardProps {
   demo_url: string | null;
   github_url: string | null;
 }
+
+// Custom hook to detect mobile devices
+const use_device_detection = () => {
+  const [is_mobile, set_is_mobile] = useState(false);
+
+  useEffect(() => {
+    const check_mobile = () => {
+      const mobile_regex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+      return mobile_regex.test(navigator.userAgent) || window.innerWidth < 768;
+    };
+
+    set_is_mobile(check_mobile());
+
+    // Listen for resize events to handle dynamic viewport changes
+    const handle_resize = () => {
+      set_is_mobile(check_mobile());
+    };
+
+    window.addEventListener('resize', handle_resize);
+    return () => window.removeEventListener('resize', handle_resize);
+  }, []);
+
+  return { is_mobile };
+};
 
 // Custom hook for 3D tilt effect
 const use3DTilt = () => {
@@ -55,7 +79,6 @@ const use3DTilt = () => {
 };
 
 
-// ProjectCard component to display project details
 const ProjectCard = ({
   id,
   title,
@@ -67,14 +90,19 @@ const ProjectCard = ({
 }: ProjectCardProps) => {
   const { theme } = use_theme();
   const navigate = useNavigate();
+  const { is_mobile } = use_device_detection();
   const { ref, transform, glareStyle, handleMouseMove, handleMouseLeave, isHovered } = use3DTilt();
   
   const handleCardClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on GitHub link
+    // Don't navigate if clicking on links (GitHub, Preview)
     if ((e.target as HTMLElement).closest('a')) {
       return;
     }
-    navigate(`/projects/${id}`);
+    
+    // Only navigate on desktop devices
+    if (!is_mobile) {
+      navigate(`/projects/${id}`);
+    }
   };
   
   return (
@@ -84,9 +112,10 @@ const ProjectCard = ({
       transition={{ duration: 0.7 }}
       className="h-full"
       style={{ perspective: '1000px' }}
-    >
-      <div
-        ref={ref}        className={`glass-morphism rounded-2xl overflow-hidden p-8 h-full flex flex-col justify-between cursor-pointer transform-gpu transition-all duration-200 ${
+    >      <div
+        ref={ref}        className={`glass-morphism rounded-2xl overflow-hidden p-8 h-full flex flex-col justify-between transition-all duration-200 ${
+          !is_mobile ? 'cursor-pointer' : ''
+        } transform-gpu ${
           isHovered 
             ? theme === 'light' 
               ? 'shadow-2xl shadow-gray-900/30' 

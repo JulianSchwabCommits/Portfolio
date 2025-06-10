@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 import { use_theme } from '../context/ThemeContext';
 
@@ -11,6 +12,30 @@ interface Experience {
   description: string;
   skills: string[];
 }
+
+// Custom hook to detect mobile devices
+const use_device_detection = () => {
+  const [is_mobile, set_is_mobile] = useState(false);
+
+  useEffect(() => {
+    const check_mobile = () => {
+      const mobile_regex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+      return mobile_regex.test(navigator.userAgent) || window.innerWidth < 768;
+    };
+
+    set_is_mobile(check_mobile());
+
+    // Listen for resize events to handle dynamic viewport changes
+    const handle_resize = () => {
+      set_is_mobile(check_mobile());
+    };
+
+    window.addEventListener('resize', handle_resize);
+    return () => window.removeEventListener('resize', handle_resize);
+  }, []);
+
+  return { is_mobile };
+};
 
 
 
@@ -56,7 +81,16 @@ const use3DTilt = () => {
 // Experience Card component with 3D tilt effect
 const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
   const { theme } = use_theme();
+  const navigate = useNavigate();
+  const { is_mobile } = use_device_detection();
   const { ref, transform, glareStyle, handleMouseMove, handleMouseLeave, isHovered } = use3DTilt();
+
+  const handleClick = () => {
+    // Only navigate on desktop devices
+    if (!is_mobile) {
+      navigate(`/experiences/${exp.id}`);
+    }
+  };
 
   return (
     <motion.div
@@ -67,7 +101,9 @@ const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
       style={{ perspective: '1000px' }}
     >      <div
         ref={ref}
-        className={`glass-morphism p-6 md:p-8 rounded-2xl cursor-pointer transform-gpu transition-all duration-200 ${
+        className={`glass-morphism p-6 md:p-8 rounded-2xl transition-all duration-200 ${
+          !is_mobile ? 'cursor-pointer' : ''
+        } transform-gpu ${
           isHovered 
             ? theme === 'light' 
               ? 'shadow-2xl shadow-gray-900/30' 
@@ -83,6 +119,7 @@ const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
       >
         {/* Enhanced background on hover */}
         <div className={`absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-2xl transition-opacity duration-200 ${
