@@ -11,7 +11,8 @@ if (!supabase_url || !supabase_anon_key) {
   console.warn('Missing Supabase environment variables in utils/supabase.ts');
   console.warn('VITE_SUPABASE_URL:', supabase_url);
   console.warn('VITE_SUPABASE_ANON_KEY:', supabase_anon_key ? 'Present' : 'Missing');
-  console.warn('All env vars:', Object.keys(import.meta.env));
+  console.warn('All env vars keys:', Object.keys(import.meta.env));
+  console.warn('All env vars values:', import.meta.env);
   console.warn('Using fallback values - Supabase features will not work properly');
 }
 
