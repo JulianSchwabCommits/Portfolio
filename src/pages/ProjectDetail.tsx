@@ -91,14 +91,14 @@ const ProjectDetail = () => {
               theme === 'light' ? 'text-gray-600' : 'text-gray-300'
             }`}>
               Cannot connect to server. Please contact me directly.
-            </p>
-            <Link
+            </p>            <Link
               to="/contact"
-              className={`inline-block px-6 py-3 rounded-2xl transition-all duration-200 ${
+              className={`inline-block px-6 py-3 rounded-2xl transition-all duration-200 relative z-10 ${
                 theme === 'light'
                   ? 'bg-gray-800 text-white hover:bg-gray-700 shadow-lg shadow-gray-900/20'
                   : 'bg-white/10 text-white hover:bg-white/20 shadow-lg shadow-black/20'
               }`}
+              style={{ pointerEvents: 'auto' }}
             >
               Contact Me
             </Link>
@@ -107,9 +107,11 @@ const ProjectDetail = () => {
       </PageTransition>
     );
   }  return (
-    <PageTransition>
-      <div className="min-h-screen bg-gradient-to-b from-background to-background/50">
-        <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20">
+    <PageTransition key={`project-detail-${theme}`}>
+      <div className="min-h-screen bg-gradient-to-b from-background to-background/50"
+           style={{ pointerEvents: 'auto' }}>
+        <div className="max-w-7xl mx-auto px-8 sm:px-12 md:px-16 lg:px-24 pt-24 pb-20"
+             style={{ pointerEvents: 'auto' }}>
           {/* Header Section */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16">
             <motion.div
@@ -123,41 +125,69 @@ const ProjectDetail = () => {
               <p className={`text-2xl ${
                 theme === 'light' ? 'text-gray-600' : 'text-gray-300'
               }`}>{project.year}</p>
-            </motion.div>
-
-            <motion.div
+            </motion.div>            <motion.div
+              key={`project-actions-${theme}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               className="flex gap-4 mt-4 md:mt-0"
-            >
-              {project.github_url && (
-                <a
-                  href={project.github_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`glass-morphism px-6 py-3 rounded-full transition-all duration-200 text-lg font-medium ${
-                    theme === 'light'
-                      ? 'text-gray-800 hover:bg-black/10'
-                      : 'text-white hover:bg-white/10'
-                  }`}
-                >
-                  GitHub →
-                </a>
+            >              {project.github_url && (
+                <div className="relative">
+                  <a
+                    href={project.github_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block px-6 py-3 rounded-full transition-all duration-200 text-lg font-medium relative z-[100] backdrop-blur-xl border ${
+                      theme === 'light'
+                        ? 'bg-black/5 border-black/10 text-gray-800 hover:bg-black/10'
+                        : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    }`}
+                    style={{ 
+                      pointerEvents: 'auto',
+                      cursor: 'pointer',
+                      zIndex: 100,
+                      position: 'relative'
+                    }}
+                    onClick={(e) => {
+                      console.log('GitHub link clicked:', project.github_url);
+                      // Force navigation if needed
+                      if (project.github_url) {
+                        window.open(project.github_url, '_blank');
+                      }
+                    }}
+                  >
+                    GitHub →
+                  </a>
+                </div>
               )}
               {project.demo_url && (
-                <a
-                  href={project.demo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`glass-morphism px-6 py-3 rounded-full transition-all duration-200 text-lg font-medium ${
-                    theme === 'light'
-                      ? 'text-gray-800 hover:bg-black/10'
-                      : 'text-white hover:bg-white/10'
-                  }`}
-                >
-                  Live Demo →
-                </a>
+                <div className="relative">
+                  <a
+                    href={project.demo_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block px-6 py-3 rounded-full transition-all duration-200 text-lg font-medium relative z-[100] backdrop-blur-xl border ${
+                      theme === 'light'
+                        ? 'bg-black/5 border-black/10 text-gray-800 hover:bg-black/10'
+                        : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    }`}
+                    style={{ 
+                      pointerEvents: 'auto',
+                      cursor: 'pointer',
+                      zIndex: 100,
+                      position: 'relative'
+                    }}
+                    onClick={(e) => {
+                      console.log('Demo link clicked:', project.demo_url);
+                      // Force navigation if needed
+                      if (project.demo_url) {
+                        window.open(project.demo_url, '_blank');
+                      }
+                    }}
+                  >
+                    Live Demo →
+                  </a>
+                </div>
               )}
             </motion.div>
           </div>

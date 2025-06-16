@@ -75,28 +75,18 @@ html.light-mode body {
   color: var(--text-color);
 }
 
-html.light-mode .glass-morphism {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
-}
-
 html.light-mode .technologie-pill {
   background: rgba(0, 0, 0, 0.05);
   color: var(--text-color);
 }
 
 /* Additional light mode styles */
-html.light-mode a.glass-morphism {
+html.light-mode a {
   color: #333;
 }
 
 html.light-mode a:hover {
   color: #000;
-}
-
-html.light-mode a.glass-morphism:hover {
-  background-color: rgba(0, 0, 0, 0.1);
 }
 
 html.light-mode nav a {
@@ -109,13 +99,4 @@ html.light-mode nav a:hover {
 
 html.light-mode button {
   color: #333;
-}
-
-/* Override pointer-events for SVGs in buttons */
-button svg {
-  pointer-events: auto !important;
-}
-
-.theme-toggle-button svg {
-  pointer-events: auto !important;
 }
