@@ -1,0 +1,22 @@
+[33mcommit da701e542cd0ec9755988278955e225cb039dbe8[m
+Author: JulianSchwabCommits <jla.schwab@gmail.com>
+Date:   Mon Jun 16 14:25:13 2025 +0200
+
+    removed unececary fiels
+
+src/components/AnalyticsInit.tsx
+src/components/AnalyticsMiddleware.tsx
+src/db/README.md
+src/db/admin_update.sql
+src/db/analytics_enhanced.sql
+src/db/analytics_functions.sql
+src/db/analytics_tracker.sql
+src/db/chat_history_schema.sql
+src/db/exec_sql_function.sql
+src/db/schema.sql
+src/db/schema_dump.sql
+src/db/setup_analytics.sh
+src/db/table_functions.sql
+src/lib/analytics.ts
+src/pages/Admin.tsx
+src/pages/Login.tsx
