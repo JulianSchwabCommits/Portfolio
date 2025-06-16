@@ -4,10 +4,15 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Provide fallback values if environment variables are missing
+const FALLBACK_URL = 'https://placeholder.supabase.co';
+const FALLBACK_KEY = 'placeholder-key';
+
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase environment variables. Please check your .env file.');
-  console.error('VITE_SUPABASE_URL:', supabaseUrl);
-  console.error('VITE_SUPABASE_ANON_KEY:', supabaseKey ? 'Present' : 'Missing');
+  console.warn('Missing Supabase environment variables. Please check your .env file.');
+  console.warn('VITE_SUPABASE_URL:', supabaseUrl);
+  console.warn('VITE_SUPABASE_ANON_KEY:', supabaseKey ? 'Present' : 'Missing');
+  console.warn('Using fallback values - Supabase features will not work properly');
 }
 
 // Create a single supabase client for the entire app using singleton pattern
@@ -21,10 +26,9 @@ export const getSupabase = () => {
     supabaseInstance = globalThis.__SUPABASE_SINGLETON_INSTANCE;
     return supabaseInstance;
   }
-  
-  supabaseInstance = createClient(
-    supabaseUrl || '',
-    supabaseKey || '',
+    supabaseInstance = createClient(
+    supabaseUrl || FALLBACK_URL,
+    supabaseKey || FALLBACK_KEY,
     {
       auth: {
         persistSession: true,
