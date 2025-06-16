@@ -322,13 +322,12 @@ const About = () => {
 
     fetch_about();
   }, []);
-  
   const renderContent = (item: AboutData) => {
     if (item.type === 'title') {
       // Replace {temp} placeholder with actual temperature
-      const processedText = item.text.replace('{temp}', temperature !== null ? `${temperature}°C` : '...');
+      const processedText = item.text.replace('{temp}', temperature !== null ? `${temperature}°C` : '');
       return (
-        <h2 key={item.id} className="text-2xl md:text-3xl font-serif mb-4 text-gray-100">
+        <h2 key={`${item.id}-${temperature}`} className="text-2xl md:text-3xl font-serif mb-4 text-gray-100">
           {processedText}
         </h2>
       );
