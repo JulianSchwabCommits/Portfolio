@@ -100,6 +100,7 @@ const SearchPopup = () => {
   const [experiences, set_experiences] = useState<SearchItem[]>([]);
   const [show_chatbot, set_show_chatbot] = useState(false);
   const [chatbot_query, set_chatbot_query] = useState('');
+  const input_ref = useRef<HTMLInputElement>(null);
   const { set_theme, theme } = use_theme();
   const navigate = useNavigate();
 
@@ -201,6 +202,11 @@ const SearchPopup = () => {
         e.preventDefault();
         set_is_open(true);
         set_search('');
+        set_selected_index(0);
+        // Focus input after opening
+        setTimeout(() => {
+          input_ref.current?.focus();
+        }, 100);
       }
       if (e.key === 'Escape') {
         set_is_open(false);
@@ -211,6 +217,13 @@ const SearchPopup = () => {
     window.addEventListener('keydown', handle_keydown);
     return () => window.removeEventListener('keydown', handle_keydown);
   }, []);
+
+  // Auto-focus input when popup opens
+  useEffect(() => {
+    if (is_open && input_ref.current) {
+      input_ref.current.focus();
+    }
+  }, [is_open]);
 
   const handle_keydown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
@@ -235,6 +248,7 @@ const SearchPopup = () => {
   };
 
   const handle_selection = (item: SearchItem) => {
+    console.log('SearchPopup - handling selection:', item);
     if (item.type === 'theme') {
       set_theme(item.title.toLowerCase() === 'dark mode' ? 'dark' : 'light');
     } else if (item.type === 'route') {
@@ -244,6 +258,7 @@ const SearchPopup = () => {
     }
     set_is_open(false);
     set_search('');
+    console.log('SearchPopup - selection complete, popup closed');
   };
 
   return (
@@ -257,6 +272,7 @@ const SearchPopup = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
             onClick={() => {
+              console.log('SearchPopup overlay clicked - closing');
               set_is_open(false);
             }}
           >
@@ -268,15 +284,20 @@ const SearchPopup = () => {
               className="w-full max-w-lg p-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="glass-morphism rounded-2xl p-4 transform-gpu transition-all duration-200" style={{ 
+              <div className={`rounded-2xl p-4 transform-gpu transition-all duration-200 backdrop-blur-xl ${
+                theme === 'light' 
+                  ? 'bg-white/20 border border-white/30' 
+                  : 'glass-morphism'
+              }`} style={{ 
                 height: '480px', 
                 display: 'flex', 
                 flexDirection: 'column',
                 boxShadow: theme === 'light' 
-                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.3)' 
+                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2)' 
                   : '0 25px 50px -12px rgba(255, 255, 255, 0.1)'
               }}>
                 <input
+                  ref={input_ref}
                   type="text"
                   value={search}
                   onChange={(e) => {
@@ -287,10 +308,9 @@ const SearchPopup = () => {
                   placeholder="Search for pages, themes, projects, or experiences..."
                   className={`w-full bg-transparent outline-none text-lg py-2 border-b transition-all duration-200 ${
                     theme === 'light' 
-                      ? 'text-gray-800 placeholder-gray-500 border-gray-300 focus:border-gray-600' 
+                      ? 'text-gray-900 placeholder-gray-400 border-gray-200 focus:border-gray-400' 
                       : 'text-white placeholder-gray-400 border-white/20 focus:border-white/40'
                   }`}
-                  autoFocus
                 />
                 
                 {filtered_results.length > 0 ? (
@@ -308,7 +328,7 @@ const SearchPopup = () => {
                           key={`${result.type}-${result.id}`}
                           className={`relative p-3 rounded-2xl cursor-pointer transition-all duration-200 ${
                             theme === 'light'
-                              ? 'border border-transparent hover:bg-gray-50/50'
+                              ? 'border border-transparent hover:bg-gray-100/80'
                               : 'border border-transparent hover:bg-white/5'
                           }`}
                           onClick={() => handle_selection(result)}
@@ -319,9 +339,9 @@ const SearchPopup = () => {
                           {is_active && (
                             <motion.div 
                               layoutId="search-result-indicator" 
-                              className={`absolute inset-0 rounded-2xl ${
+                              className={`absolute inset-0 rounded-2xl backdrop-blur-md ${
                                 theme === 'light'
-                                  ? 'border border-gray-300 bg-gray-100 shadow-sm shadow-gray-900/10' 
+                                  ? 'bg-white/40 border border-white/50 shadow-lg shadow-gray-900/10' 
                                   : 'border border-white/20 bg-white/5 shadow-sm shadow-black/20'
                               }`}
                               initial={false}
@@ -335,11 +355,11 @@ const SearchPopup = () => {
                           <div className="relative z-10 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span className={`font-medium ${
-                                theme === 'light' ? 'text-gray-800' : 'text-white'
+                                theme === 'light' ? 'text-gray-900' : 'text-white'
                               }`}>{result.title}</span>
                               <span className={`text-xs px-2 py-0.5 rounded ${
                                 theme === 'light' 
-                                  ? 'text-gray-600 bg-gray-200' 
+                                  ? 'text-gray-700 bg-gray-200/80' 
                                   : 'text-gray-300 bg-gray-800/30'
                               }`}>
                                 {result.type.charAt(0).toUpperCase() + result.type.slice(1)}
@@ -350,7 +370,7 @@ const SearchPopup = () => {
                           {/* Show description based on conditions */}
                           {result.description && show_description && (
                             <div className={`relative z-10 mt-2 text-sm leading-relaxed ${
-                              theme === 'light' ? 'text-gray-600' : 'text-gray-300'
+                              theme === 'light' ? 'text-gray-700' : 'text-gray-300'
                             }`}>
                               {should_show_condensed && result.description.length > 100 
                                 ? `${result.description.substring(0, 100)}...` 
@@ -361,7 +381,7 @@ const SearchPopup = () => {
                           {/* Show period for experiences */}
                           {result.period && show_description && (
                             <div className={`relative z-10 mt-1 text-xs ${
-                              theme === 'light' ? 'text-gray-500' : 'text-gray-400'
+                              theme === 'light' ? 'text-gray-600' : 'text-gray-400'
                             }`}>
                               {result.period}
                             </div>
@@ -370,7 +390,7 @@ const SearchPopup = () => {
                           {/* Show hover/navigation hint for condensed view */}
                           {result.description && should_show_condensed && !show_description && (
                             <div className={`relative z-10 mt-2 text-xs italic ${
-                              theme === 'light' ? 'text-gray-400' : 'text-gray-500'
+                              theme === 'light' ? 'text-gray-500' : 'text-gray-500'
                             }`}>
                               Hover or use ↑↓ to see description
                             </div>
@@ -383,10 +403,10 @@ const SearchPopup = () => {
                   <div className="mt-2 p-4 text-center flex-1 flex items-center justify-center flex-col" style={{ height: '320px' }}>
                     <div className="text-center">
                       <p className={`text-lg mb-2 ${
-                        theme === 'light' ? 'text-gray-600' : 'text-white/70'
+                        theme === 'light' ? 'text-gray-800' : 'text-white/70'
                       }`}>No results found</p>
                       <p className={`text-sm mb-4 ${
-                        theme === 'light' ? 'text-gray-500' : 'text-white/50'
+                        theme === 'light' ? 'text-gray-600' : 'text-white/50'
                       }`}>Try searching for pages, projects, experiences, or themes</p>
                       
                       <button
@@ -397,7 +417,7 @@ const SearchPopup = () => {
                         }}
                         className={`px-6 py-2 rounded-2xl transition-all duration-300 ${
                           theme === 'light'
-                            ? 'bg-gray-800 text-white hover:bg-gray-700 shadow-lg shadow-gray-900/20 hover:shadow-xl hover:shadow-gray-900/30'
+                            ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-900/20 hover:shadow-xl hover:shadow-gray-900/30'
                             : 'bg-white/10 text-white hover:bg-white/20 shadow-lg shadow-black/20 hover:shadow-xl hover:shadow-white/10'
                         } mx-auto mt-2`}
                       >
@@ -409,10 +429,10 @@ const SearchPopup = () => {
                   <div className="mt-2 p-4 text-center flex-1 flex items-center justify-center" style={{ height: '320px' }}>
                     <div className="text-center">
                       <p className={`text-lg mb-2 ${
-                        theme === 'light' ? 'text-gray-600' : 'text-white/70'
+                        theme === 'light' ? 'text-gray-800' : 'text-white/70'
                       }`}>Start typing to search</p>
                       <p className={`text-sm ${
-                        theme === 'light' ? 'text-gray-500' : 'text-white/50'
+                        theme === 'light' ? 'text-gray-600' : 'text-white/50'
                       }`}>Find pages, projects, experiences, and themes</p>
                     </div>
                   </div>
@@ -420,7 +440,7 @@ const SearchPopup = () => {
                 
                 <div className={`mt-2 text-sm border-t pt-2 flex justify-between ${
                   theme === 'light' 
-                    ? 'text-gray-600 border-gray-300' 
+                    ? 'text-gray-700 border-gray-200' 
                     : 'text-gray-400 border-white/10'
                 }`}>
                   <span>Press Enter to select, ↑↓ to navigate</span>
