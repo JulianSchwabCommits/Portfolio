@@ -37,12 +37,14 @@ const ChatbotPopup = ({ onClose, initialMessage }: ChatbotPopupProps) => {
           >
             <X className="w-5 h-5" />
           </button>          {/* Chatbot component with increased height for popup */}
-          <div className={`h-[600px] ${
-            theme === 'light' 
-              ? 'shadow-2xl shadow-gray-900/30' 
-              : 'shadow-2xl shadow-black/40'
-          } rounded-2xl overflow-hidden`}>
-            <Chatbot initialMessage={initialMessage} />
+          <div className="p-6">
+            <div className={`h-[600px] ${
+              theme === 'light' 
+                ? 'shadow-2xl shadow-gray-900/30' 
+                : 'shadow-2xl shadow-black/40'
+            } rounded-2xl`}>
+              <Chatbot initialMessage={initialMessage} />
+            </div>
           </div>
         </motion.div>
       </motion.div>

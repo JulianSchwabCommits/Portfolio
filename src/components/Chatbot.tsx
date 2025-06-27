@@ -181,7 +181,7 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
 
   return (
     <motion.div
-      className={`glass-morphism rounded-2xl overflow-hidden flex flex-col h-[400px] transform-gpu transition-all duration-200 ${
+      className={`glass-morphism rounded-2xl flex flex-col h-[400px] transform-gpu transition-all duration-200 ${
         theme === 'light' 
           ? 'text-gray-800 shadow-lg shadow-gray-900/20' 
           : 'text-white shadow-lg shadow-black/20'
