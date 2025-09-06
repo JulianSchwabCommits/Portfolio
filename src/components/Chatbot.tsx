@@ -61,7 +61,7 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
   useEffect(() => {
     // Only fetch data if system prompt hasn't been set yet
     if (systemPrompt) return;
-    
+
     const fetch_data = async () => {
       try {
         const [projects_res, experiences_res] = await Promise.all([
@@ -128,20 +128,22 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
       const api_key = import.meta.env.VITE_GEMINI_API_KEY;
       console.log('Gemini API Key:', api_key ? 'Present' : 'Missing');
 
-      // Format request according to Gemini API specifications
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${api_key}`, {
+      // Format request according to Gemini API specifications (matching curl command)
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "X-goog-api-key": api_key
         },
         body: JSON.stringify({
           contents: [
-            { role: "user", parts: [{ text: systemPrompt }] },
-            ...messages.map(msg => ({
-              role: msg.sender === "user" ? "user" : "model",
-              parts: [{ text: msg.text }]
-            })),
-            { role: "user", parts: [{ text: input }] }
+            {
+              parts: [
+                {
+                  text: `${systemPrompt}\n\nConversation history:\n${messages.map(msg => `${msg.sender}: ${msg.text}`).join('\n')}\n\nUser: ${input}`
+                }
+              ]
+            }
           ]
         })
       });
@@ -181,15 +183,14 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
 
   return (
     <motion.div
-      className={`glass-morphism rounded-2xl flex flex-col h-[400px] transform-gpu transition-all duration-200 ${
-        theme === 'light' 
-          ? 'text-gray-800 shadow-lg shadow-gray-900/20' 
+      className={`glass-morphism rounded-2xl flex flex-col h-[400px] transform-gpu transition-all duration-200 ${theme === 'light'
+          ? 'text-gray-800 shadow-lg shadow-gray-900/20'
           : 'text-white shadow-lg shadow-black/20'
-      }`}
-      whileHover={{ 
+        }`}
+      whileHover={{
         scale: 1.02,
-        boxShadow: theme === 'light' 
-          ? '0 25px 50px -12px rgba(0, 0, 0, 0.3)' 
+        boxShadow: theme === 'light'
+          ? '0 25px 50px -12px rgba(0, 0, 0, 0.3)'
           : '0 25px 50px -12px rgba(255, 255, 255, 0.1)'
       }}
       transition={{ duration: 0.2 }}
@@ -198,11 +199,10 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
         {onExpand && (
           <motion.button
             onClick={onExpand}
-            className={`p-2 rounded-full transition-all duration-200 absolute top-2 right-2 ${
-              theme === 'light'
+            className={`p-2 rounded-full transition-all duration-200 absolute top-2 right-2 ${theme === 'light'
                 ? 'hover:bg-gray-200 text-gray-800'
                 : 'hover:bg-white/10 text-white'
-            }`}
+              }`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
