@@ -1,43 +1,11 @@
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 import PageTransition from "../components/PageTransition";
 import ProjectCard from "../components/ProjectCard";
-import { supabase } from "../utils/supabase";
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  demo_url: string | null;
-  github_url: string | null;
-  tags: string[];
-  year: string;
-}
+import { useContent } from "../context/ContentContext";
 
 const Play = () => {
-  const [projects, set_projects] = useState<Project[]>([]);
-  const [loading, set_loading] = useState(true);
-  const [error, set_error] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetch_projects = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .order('year', { ascending: false });
-
-        if (error) throw error;
-        set_projects(data || []);
-      } catch (err) {
-        set_error(err instanceof Error ? err.message : 'Failed to fetch projects');
-      } finally {
-        set_loading(false);
-      }
-    };
-
-    fetch_projects();
-  }, []);
+  const { content } = useContent();
+  const projects = content.projects;
 
   return (
     <PageTransition>
@@ -70,9 +38,7 @@ const Play = () => {
             Personal Projects
           </motion.h1>
         </motion.div>
-          {loading ? (
-          <div className="text-center">Loading...</div>
-        ) : error || projects.length === 0 ? (
+        {projects.length === 0 ? (
           <div className="text-center">
             <p className="text-xl text-gray-300 mb-4">Cannot connect to server</p>
             <p className="text-lg text-gray-400">
@@ -94,9 +60,9 @@ const Play = () => {
                 title={project.title}
                 description={project.description}
                 year={project.year}
-                technologies={project.tags}
-                demo_url={project.demo_url}
-                github_url={project.github_url}
+                tags={project.tags}
+                demoUrl={project.demoUrl}
+                githubUrl={project.githubUrl}
               />
             ))}
           </div>

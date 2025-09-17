@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Maximize2 } from "lucide-react";
 import { use_theme } from "../context/ThemeContext";
 import { useChatContext } from "../context/ChatContext";
-import { supabase } from "../utils/supabase";
+import { useContent } from "../context/ContentContext";
 
 interface Experience {
   id: number;
@@ -57,44 +57,32 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { theme } = use_theme();
+  const { content } = useContent();
 
   useEffect(() => {
-    // Only fetch data if system prompt hasn't been set yet
-    if (systemPrompt) return;
+    const experiences = content.experiences;
+    const projects = content.projects;
 
-    const fetch_data = async () => {
-      try {
-        const [projects_res, experiences_res] = await Promise.all([
-          supabase.from('projects').select('*').order('year', { ascending: false }),
-          supabase.from('experiences').select('*').order('period', { ascending: false })
-        ]);
+    if (experiences.length === 0 && projects.length === 0) {
+      return;
+    }
 
-        if (projects_res.error) throw projects_res.error;
-        if (experiences_res.error) throw experiences_res.error;
+    const birth_date = new Date('2008-05-21');
+    const today = new Date();
+    let age = today.getFullYear() - birth_date.getFullYear();
+    const month_diff = today.getMonth() - birth_date.getMonth();
 
-        const birth_date = new Date('2008-05-21');
-        const today = new Date();
-        let age = today.getFullYear() - birth_date.getFullYear();
-        const month_diff = today.getMonth() - birth_date.getMonth();
+    if (month_diff < 0 || (month_diff === 0 && today.getDate() < birth_date.getDate())) {
+      age--;
+    }
 
-        if (month_diff < 0 || (month_diff === 0 && today.getDate() < birth_date.getDate())) {
-          age--;
-        }
+    const prompt = generate_system_prompt(experiences, projects, age);
 
-        const prompt = generate_system_prompt(
-          experiences_res.data || [],
-          projects_res.data || [],
-          age
-        );
-        setSystemPrompt(prompt);
-        console.log('System Prompt:', prompt);
-      } catch (error) {
-        console.error('Error fetching data for system prompt:', error);
-      }
-    };
-
-    fetch_data();
-  }, [systemPrompt, setSystemPrompt]);
+    if (prompt !== systemPrompt) {
+      setSystemPrompt(prompt);
+      console.log('System Prompt:', prompt);
+    }
+  }, [content.experiences, content.projects, setSystemPrompt, systemPrompt]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

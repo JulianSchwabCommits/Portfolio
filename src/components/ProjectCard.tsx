@@ -8,9 +8,9 @@ interface ProjectCardProps {
   title: string;
   description: string;
   year: string;
-  technologies: string[];
-  demo_url: string | null;
-  github_url: string | null;
+  tags: string[];
+  demoUrl?: string | null;
+  githubUrl?: string | null;
 }
 
 // Custom hook to detect mobile devices
@@ -84,9 +84,9 @@ const ProjectCard = ({
   title,
   description,
   year,
-  technologies,
-  demo_url,
-  github_url
+  tags,
+  demoUrl,
+  githubUrl
 }: ProjectCardProps) => {
   const { theme } = use_theme();
   const navigate = useNavigate();
@@ -154,9 +154,9 @@ const ProjectCard = ({
             <span className={`text-lg transition-colors duration-200 ${
               isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
             }`}>{year}</span>
-            {demo_url && (
+            {demoUrl && (
               <a
-                href={demo_url}
+                href={demoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`px-5 py-2 rounded-full transition-all duration-200 text-center ${
@@ -184,8 +184,8 @@ const ProjectCard = ({
         
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-4 relative z-20 transform-gpu" style={{ transform: 'translateZ(20px)' }}>
           <div className="flex flex-wrap gap-2 max-w-full sm:max-w-[70%]">
-            {technologies.map((tech, index) => (
-              <span 
+            {tags.map((tech, index) => (
+              <span
                 key={index}
                 className={`px-4 py-2 rounded-full text-sm transition-all duration-200 ${
                   isHovered 
@@ -202,11 +202,11 @@ const ProjectCard = ({
             ))}
           </div>
 
-          {github_url && (
-            <a
-              href={github_url}
-              target="_blank"
-              rel="noopener noreferrer"
+        {githubUrl && (
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
               className={`px-5 py-2 mt-1 sm:mt-0 rounded-full transition-all duration-200 text-center shrink-0 ${
                 isHovered 
                   ? theme === 'light' 

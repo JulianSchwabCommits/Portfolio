@@ -1,19 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
 import { use_theme } from '../context/ThemeContext';
-
-interface Experience {
-  id: number;
-  title: string;
-  company: string;
-  period: string;
-  description: string;
-  skills: string[];
-  link?: string;
-  link_name?: string;
-}
+import { useContent } from '../context/ContentContext';
+import type { ExperienceContent } from '../types/content';
 
 // Custom hook to detect mobile devices
 const use_device_detection = () => {
@@ -81,7 +71,7 @@ const use3DTilt = () => {
 };
 
 // Experience Card component with 3D tilt effect
-const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
+const ExperienceCard = ({ exp, index }: { exp: ExperienceContent; index: number }) => {
   const { theme } = use_theme();
   const navigate = useNavigate();
   const { is_mobile } = use_device_detection();
@@ -147,7 +137,7 @@ const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
               <div className="flex items-center gap-2 mb-2">
                 <p className={`transition-colors duration-200 ${
                   isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
-                }`}>{exp.company}</p>                {exp.link && exp.link_name && (
+                }`}>{exp.company}</p>                {exp.link && exp.linkName && (
                   <a
                     href={exp.link}
                     target="_blank"
@@ -159,7 +149,7 @@ const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
                     }`}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {exp.link_name}
+                    {exp.linkName}
                   </a>
                 )}
               </div>
@@ -200,29 +190,9 @@ const ExperienceCard = ({ exp, index }: { exp: Experience; index: number }) => {
 };
 
 const Experience = () => {
-  const [experiences, set_experiences] = useState<Experience[]>([]);
-  const [loading, set_loading] = useState(true);
   const { theme } = use_theme();
-  useEffect(() => {
-    const fetch_experiences = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('experiences')
-          .select('*')
-          .order('id', { ascending: false });
-
-        if (error) throw error;
-        set_experiences(data || []);
-      } catch (err) {
-        console.warn('Failed to fetch experiences from Supabase:', err);
-        set_experiences([]);
-      } finally {
-        set_loading(false);
-      }
-    };
-
-    fetch_experiences();
-  }, []);  if (loading) return <div className="text-center">Loading...</div>;
+  const { content } = useContent();
+  const experiences = content.experiences;
 
   if (experiences.length === 0) {
     return (

@@ -9,9 +9,9 @@ interface ExperienceProps {
   company: string;
   period: string;
   description: string;
-  technologies?: string[];
+  skills?: string[];
   link?: string;
-  link_name?: string;
+  linkName?: string;
 }
 
 // Custom hook to detect mobile devices
@@ -84,9 +84,9 @@ const WorkExperience = ({
   company,
   period,
   description,
-  technologies,
+  skills,
   link,
-  link_name,
+  linkName,
 }: ExperienceProps) => {
   const { theme } = use_theme();
   const navigate = useNavigate();
@@ -155,7 +155,7 @@ const WorkExperience = ({
               <div className="flex items-center gap-2 mb-2">
                 <p className={`transition-colors duration-200 ${
                   isHovered ? 'text-gray-300' : theme === 'light' ? 'text-gray-600' : 'text-gray-400'
-                }`}>@{company}</p>                {link && link_name && (
+                }`}>@{company}</p>                {link && linkName && (
                   <a
                     href={link}
                     target="_blank"
@@ -167,7 +167,7 @@ const WorkExperience = ({
                     }`}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {link_name}
+                    {linkName}
                   </a>
                 )}
               </div>
@@ -181,11 +181,11 @@ const WorkExperience = ({
             isHovered ? 'text-gray-200' : theme === 'light' ? 'text-gray-700' : 'text-gray-300'
           }`}>{description}</p>
           
-          {technologies && technologies.length > 0 && (
+          {skills && skills.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
-              {technologies.map((tech) => (
-                <span 
-                  key={tech} 
+              {skills.map((tech) => (
+                <span
+                  key={tech}
                   className={`technologie-pill transition-all duration-200 ${
                     isHovered ? 'scale-105 bg-white/20' : ''
                   }`}
