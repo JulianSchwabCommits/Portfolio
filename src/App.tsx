@@ -16,8 +16,10 @@ import SearchPopup from "./components/SearchPopup";
 import AlertPopup from "./components/AlertPopup";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ChatProvider } from "./context/ChatContext";
+import { ContentProvider } from "./context/ContentContext";
 import ProjectDetail from "./pages/ProjectDetail";
 import ExperienceDetail from './pages/ExperienceDetail';
+import Admin from "./pages/Admin";
 import usePageTitle from "./hooks/use-page-title";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,7 @@ const AnimatedRoutes = () => {
         <Route path="/about" element={<About />} />
         <Route path="/play" element={<Play />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/experiences/:id" element={<ExperienceDetail />} />
         <Route path="*" element={<NotFound />} />
@@ -66,27 +69,29 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <ChatProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <div className="relative">
-                <CursorShadow />
-                <Navbar />
-                <SearchPopup isAlertOpen={showAlert} />
-                <AlertPopup
-                  isOpen={showAlert}
-                  onClose={handleCloseAlert}
-                  onAccept={handleAcceptAlert}
-                />
-                <AnimatedRoutes />
-              </div>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ChatProvider>
-      </ThemeProvider>
+      <ContentProvider>
+        <ThemeProvider>
+          <ChatProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <div className="relative">
+                  <CursorShadow />
+                  <Navbar />
+                  <SearchPopup isAlertOpen={showAlert} />
+                  <AlertPopup
+                    isOpen={showAlert}
+                    onClose={handleCloseAlert}
+                    onAccept={handleAcceptAlert}
+                  />
+                  <AnimatedRoutes />
+                </div>
+              </BrowserRouter>
+            </TooltipProvider>
+          </ChatProvider>
+        </ThemeProvider>
+      </ContentProvider>
     </QueryClientProvider>
   );
 };

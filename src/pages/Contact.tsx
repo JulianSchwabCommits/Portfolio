@@ -1,31 +1,30 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Phone, Github, Linkedin } from "lucide-react";
+import { Mail, Phone, Github, Linkedin, Globe } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import Chatbot from "../components/Chatbot";
 import ChatbotPopup from '../components/ChatbotPopup';
 import { use_theme } from '../context/ThemeContext';
+import { useContent } from '../context/ContentContext';
+import type { ContactLink } from '../types/content';
 
-const contactInfo = [
-  {
-    icon: <Mail className="w-5 h-5" />,
-    label: "Email",
-    value: "me@julianschwab.dev",
-    href: "mailto:me@julianschwab.dev"
-  },
-  {
-    icon: <Github className="w-5 h-5" />,
-    label: "GitHub",
-    value: "JulianSchwabCommits",
-    href: "https://github.com/JulianSchwabCommits"
-  },
-  {
-    icon: <Linkedin className="w-5 h-5" />,
-    label: "LinkedIn",
-    value: "julian-schwab",
-    href: "https://www.linkedin.com/in/julian-schwab-680349263"
+const iconForType = (type: ContactLink["type"]) => {
+  const baseClass = "w-5 h-5";
+  switch (type) {
+    case 'email':
+      return <Mail className={baseClass} />;
+    case 'github':
+      return <Github className={baseClass} />;
+    case 'linkedin':
+      return <Linkedin className={baseClass} />;
+    case 'phone':
+      return <Phone className={baseClass} />;
+    case 'website':
+      return <Globe className={baseClass} />;
+    default:
+      return <Globe className={baseClass} />;
   }
-];
+};
 
 // Custom hook for 3D tilt effect
 const use3DTilt = () => {
@@ -69,7 +68,14 @@ const use3DTilt = () => {
 };
 
 // Tilt Card Component
-const TiltCard = ({ item, index, theme }: { item: typeof contactInfo[0], index: number, theme: string }) => {
+interface ContactCardItem {
+  icon: JSX.Element;
+  label: string;
+  value: string;
+  href: string;
+}
+
+const TiltCard = ({ item, index, theme }: { item: ContactCardItem; index: number; theme: string }) => {
   const { ref, transform, glareStyle, handleMouseMove, handleMouseLeave, isHovered } = use3DTilt();
 
   return (
@@ -142,9 +148,21 @@ const TiltCard = ({ item, index, theme }: { item: typeof contactInfo[0], index: 
 
 const Contact = () => {
   const { theme } = use_theme();
+  const { content } = useContent();
   const [show_chatbot, set_show_chatbot] = useState(false);
   const [is_mobile, set_is_mobile] = useState(false);
   const [is_scrolled, set_is_scrolled] = useState(false);
+
+  const contactInfo = useMemo<ContactCardItem[]>(
+    () =>
+      content.contactLinks.map(link => ({
+        icon: iconForType(link.type),
+        label: link.label,
+        value: link.value,
+        href: link.href
+      })),
+    [content.contactLinks]
+  );
 
   useEffect(() => {
     const check_mobile = () => {
@@ -226,11 +244,15 @@ const Contact = () => {
               transition={{ duration: 0.7, delay: 0.2 }}
             >
               <h2 className="text-2xl md:text-3xl font-serif mb-8">Contact Information</h2>
-              
+
               <ul className="space-y-6">
-                {contactInfo.map((item, index) => (
-                  <TiltCard key={index} item={item} index={index} theme={theme} />
-                ))}
+                {contactInfo.length > 0 ? (
+                  contactInfo.map((item, index) => (
+                    <TiltCard key={index} item={item} index={index} theme={theme} />
+                  ))
+                ) : (
+                  <li className="text-gray-400">Add contact links from the admin page to show them here.</li>
+                )}
               </ul>
             </motion.div>
             

@@ -1,10 +1,13 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { use_theme } from "../context/ThemeContext";
+import { useContent } from "../context/ContentContext";
 
 const Hero = () => {
   const [show_arrow, set_show_arrow] = useState(true);
   const { theme } = use_theme();
+  const { content } = useContent();
+  const hero = content.hero;
   
   useEffect(() => {
     const handle_scroll = () => {
@@ -32,7 +35,7 @@ const Hero = () => {
         }
       }}
     >
-      <motion.h1 
+      <motion.h1
         className="text-6xl md:text-8xl font-serif mb-1 text-center mx-auto"
         variants={{
           hidden: { opacity: 0, y: 50 },
@@ -43,10 +46,10 @@ const Hero = () => {
           }
         }}
       >
-        Hi, I'm Julian.
+        {hero.intro}
       </motion.h1>
-      
-      <motion.h2 
+
+      <motion.h2
         className="text-5xl md:text-7xl font-serif mb-2 text-center mx-auto"
         variants={{
           hidden: { opacity: 0, y: 50 },
@@ -57,10 +60,10 @@ const Hero = () => {
           }
         }}
       >
-        A Coder.
+        {hero.highlight}
       </motion.h2>
-      
-      <motion.p 
+
+      <motion.p
         className={`text-xl md:text-2xl ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'} max-w-xl text-center mx-auto`}
         variants={{
           hidden: { opacity: 0, y: 30 },
@@ -71,7 +74,7 @@ const Hero = () => {
           }
         }}
       >
-        Application Developer at Swisscom.
+        {hero.description}
       </motion.p>
       
       {/* Scroll Down Arrow */}

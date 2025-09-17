@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { use_theme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
+import { useContent } from '../context/ContentContext';
 import ChatbotPopup from './ChatbotPopup';
 
 interface SearchItem {
@@ -106,42 +106,34 @@ const SearchPopup = ({ isAlertOpen = false }: { isAlertOpen?: boolean }) => {
   const input_ref = useRef<HTMLInputElement>(null);
   const { set_theme, theme } = use_theme();
   const navigate = useNavigate();
+  const { content } = useContent();
 
   useEffect(() => {
-    const fetch_data = async () => {
-      const { data: projects_data } = await supabase
-        .from('projects')
-        .select('*')
-        .order('id', { ascending: false });
-
-      const { data: experiences_data } = await supabase
-        .from('experiences')
-        .select('*')
-        .order('id', { ascending: false });
-
-      set_projects(projects_data?.map(p => ({
-        id: p.id,
-        title: p.title,
-        type: 'project',
-        description: p.description,
-        skills: p.skills
-      })) || []);
-
-      set_experiences(experiences_data?.map(e => ({
-        id: e.id,
-        title: e.title,
-        type: 'experience',
-        company: e.company,
-        period: e.period,
-        description: e.description,
-        skills: e.skills
-      })) || []);
-    };
-
-    if (is_open) {
-      fetch_data();
+    if (!is_open) {
+      return;
     }
-  }, [is_open]);
+
+    const mappedProjects = content.projects.map(project => ({
+      id: project.id,
+      title: project.title,
+      type: 'project' as const,
+      description: project.description,
+      skills: project.tags
+    }));
+
+    const mappedExperiences = content.experiences.map(experience => ({
+      id: experience.id,
+      title: experience.title,
+      type: 'experience' as const,
+      company: experience.company,
+      period: experience.period,
+      description: experience.description,
+      skills: experience.skills
+    }));
+
+    set_projects(mappedProjects);
+    set_experiences(mappedExperiences);
+  }, [is_open, content.projects, content.experiences]);
 
   const static_results: SearchItem[] = [
     { id: 2, title: 'Work', type: 'route' },
