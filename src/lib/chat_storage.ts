@@ -30,12 +30,8 @@ export const saveChatMessage = async (
   try {
     // Skip saving if it's the first message
     if (isFirstMessage) {
-      console.log('Skipping save for first welcome message');
       return true;
     }
-    
-    // TODO: Implement secure chat message API endpoint in data.js
-    console.warn('Chat message saving disabled - requires secure API implementation');
     
     return true;
   } catch (error) {

@@ -26,7 +26,6 @@ const Navbar = () => {
             to={item.path} 
             className="relative px-2 sm:px-4 py-2 text-sm sm:text-base min-w-[60px] sm:min-w-[80px] text-center z-10"
             style={{ pointerEvents: 'auto' }}onClick={(e) => {
-              console.log('Navigation click:', item.name);
               e.preventDefault();
               navigate(item.path);
             }}

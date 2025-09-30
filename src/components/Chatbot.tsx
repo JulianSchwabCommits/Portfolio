@@ -85,7 +85,6 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
           age
         );
         setSystemPrompt(prompt);
-        console.log('System Prompt:', prompt);
       } catch (error) {
         console.error('Error fetching data for system prompt:', error);
       }

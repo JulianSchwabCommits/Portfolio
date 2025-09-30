@@ -244,7 +244,6 @@ const SearchPopup = () => {
   };
 
   const handle_selection = (item: SearchItem) => {
-    console.log('SearchPopup - handling selection:', item);
     if (item.type === 'theme') {
       set_theme(item.title.toLowerCase() === 'dark mode' ? 'dark' : 'light');
     } else if (item.type === 'route') {
@@ -254,7 +253,6 @@ const SearchPopup = () => {
     }
     set_is_open(false);
     set_search('');
-    console.log('SearchPopup - selection complete, popup closed');
   };
 
   return (

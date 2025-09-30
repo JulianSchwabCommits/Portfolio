@@ -143,7 +143,6 @@ const ProjectDetail = () => {
                       position: 'relative'
                     }}
                     onClick={(e) => {
-                      console.log('GitHub link clicked:', project.github_url);
                       // Force navigation if needed
                       if (project.github_url) {
                         window.open(project.github_url, '_blank');
@@ -172,7 +171,6 @@ const ProjectDetail = () => {
                       position: 'relative'
                     }}
                     onClick={(e) => {
-                      console.log('Demo link clicked:', project.demo_url);
                       // Force navigation if needed
                       if (project.demo_url) {
                         window.open(project.demo_url, '_blank');
