@@ -94,7 +94,7 @@ const SearchButton = ({ onClick, isDisabled = false }: { onClick: () => void; is
   );
 };
 
-const SearchPopup = ({ isAlertOpen = false }: { isAlertOpen?: boolean }) => {
+const SearchPopup = () => {
   const [is_open, set_is_open] = useState(false);
   const [search, set_search] = useState('');
   const [selected_index, set_selected_index] = useState(0);
@@ -203,8 +203,6 @@ const SearchPopup = ({ isAlertOpen = false }: { isAlertOpen?: boolean }) => {
     const handle_keydown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'k') {
         e.preventDefault();
-        // Don't open search popup if alert is open
-        if (isAlertOpen) return;
         set_is_open(true);
         set_search('');
         set_selected_index(0);
@@ -221,7 +219,7 @@ const SearchPopup = ({ isAlertOpen = false }: { isAlertOpen?: boolean }) => {
 
     window.addEventListener('keydown', handle_keydown);
     return () => window.removeEventListener('keydown', handle_keydown);
-  }, [isAlertOpen]);
+  }, []);
 
   // Auto-focus input when popup opens
   useEffect(() => {
@@ -268,7 +266,7 @@ const SearchPopup = ({ isAlertOpen = false }: { isAlertOpen?: boolean }) => {
 
   return (
     <>
-      <SearchButton onClick={() => set_is_open(true)} isDisabled={isAlertOpen} />
+      <SearchButton onClick={() => set_is_open(true)} />
       <AnimatePresence>
         {is_open && (
           <motion.div

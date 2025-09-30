@@ -13,7 +13,6 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import CursorShadow from "./components/CursorShadow";
 import SearchPopup from "./components/SearchPopup";
-import AlertPopup from "./components/AlertPopup";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ChatProvider } from "./context/ChatContext";
 import ProjectDetail from "./pages/ProjectDetail";
@@ -44,26 +43,6 @@ const App = () => {
   // Use the page title hook
   usePageTitle();
 
-  // Alert popup state
-  const [showAlert, setShowAlert] = useState(false);
-
-  // Show alert on first visit
-  useEffect(() => {
-    const hasSeenAlert = localStorage.getItem('hasSeenAlert');
-    if (!hasSeenAlert) {
-      setShowAlert(true);
-    }
-  }, []);
-
-  const handleAcceptAlert = () => {
-    localStorage.setItem('hasSeenAlert', 'true');
-    setShowAlert(false);
-  };
-
-  const handleCloseAlert = () => {
-    setShowAlert(false);
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -75,12 +54,7 @@ const App = () => {
               <div className="relative">
                 <CursorShadow />
                 <Navbar />
-                <SearchPopup isAlertOpen={showAlert} />
-                <AlertPopup
-                  isOpen={showAlert}
-                  onClose={handleCloseAlert}
-                  onAccept={handleAcceptAlert}
-                />
+                <SearchPopup />
                 <AnimatedRoutes />
               </div>
             </BrowserRouter>
