@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Maximize2 } from "lucide-react";
 import { use_theme } from "../context/ThemeContext";
 import { useChatContext } from "../context/ChatContext";
-import { supabase } from "../utils/supabase";
+import { apiClient } from "../lib/api_client";
 
 interface Experience {
   id: number;
@@ -65,13 +65,10 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
 
     const fetch_data = async () => {
       try {
-        const [projects_res, experiences_res] = await Promise.all([
-          supabase.from('projects').select('*').order('year', { ascending: false }),
-          supabase.from('experiences').select('*').order('period', { ascending: false })
+        const [projects_data, experiences_data] = await Promise.all([
+          apiClient.getProjects(),
+          apiClient.getExperiences()
         ]);
-
-        if (projects_res.error) throw projects_res.error;
-        if (experiences_res.error) throw experiences_res.error;
 
         const birth_date = new Date('2008-05-21');
         const today = new Date();
@@ -83,8 +80,8 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
         }
 
         const prompt = generate_system_prompt(
-          experiences_res.data || [],
-          projects_res.data || [],
+          experiences_data || [],
+          projects_data || [],
           age
         );
         setSystemPrompt(prompt);

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import PageTransition from "../components/PageTransition";
 import ProjectCard from "../components/ProjectCard";
-import { supabase } from "../utils/supabase";
+import { apiClient } from "../lib/api_client";
 
 interface Project {
   id: number;
@@ -22,12 +22,7 @@ const Play = () => {
   useEffect(() => {
     const fetch_projects = async () => {
       try {
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .order('year', { ascending: false });
-
-        if (error) throw error;
+        const data = await apiClient.getProjects();
         set_projects(data || []);
       } catch (err) {
         set_error(err instanceof Error ? err.message : 'Failed to fetch projects');

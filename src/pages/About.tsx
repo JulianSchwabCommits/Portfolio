@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import PageTransition from "../components/PageTransition";
-import { supabase } from "../utils/supabase";
+import { apiClient } from "../lib/api_client";
 import { use_theme } from "../context/ThemeContext";
 
 interface AboutData {
@@ -305,15 +305,10 @@ const About = () => {
     useEffect(() => {
     const fetch_about = async () => {
       try {
-        const { data, error } = await supabase
-          .from('about')
-          .select('*')
-          .order('id', { ascending: true });
-
-        if (error) throw error;
+        const data = await apiClient.getAbout();
         set_about_data(data || []);
       } catch (err) {
-        console.warn('Failed to fetch about data from Supabase:', err);
+        console.warn('Failed to fetch about data from API:', err);
         set_about_data([]);
       } finally {
         set_loading(false);

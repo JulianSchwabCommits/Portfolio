@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
+import { apiClient } from '../lib/api_client';
 import { use_theme } from '../context/ThemeContext';
 
 interface Experience {
@@ -206,15 +206,10 @@ const Experience = () => {
   useEffect(() => {
     const fetch_experiences = async () => {
       try {
-        const { data, error } = await supabase
-          .from('experiences')
-          .select('*')
-          .order('id', { ascending: false });
-
-        if (error) throw error;
+        const data = await apiClient.getExperiences();
         set_experiences(data || []);
       } catch (err) {
-        console.warn('Failed to fetch experiences from Supabase:', err);
+        console.warn('Failed to fetch experiences from API:', err);
         set_experiences([]);
       } finally {
         set_loading(false);

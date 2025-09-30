@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { supabase } from '../utils/supabase';
+import { apiClient } from '../lib/api_client';
 import PageTransition from '../components/PageTransition';
 import { use_theme } from '../context/ThemeContext';
 
@@ -32,13 +32,7 @@ const ExperienceDetail = () => {
       }
 
       try {
-        const { data, error } = await supabase
-          .from('experiences')
-          .select('*')
-          .eq('id', parseInt(id))
-          .single();
-
-        if (error) throw error;
+        const data = await apiClient.getExperience(parseInt(id));
         if (!data) {
           set_error('Experience not found');
           set_experience(null);
