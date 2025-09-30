@@ -140,45 +140,37 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
     setIsLoading(true);
 
     try {
-      const api_key = import.meta.env.VITE_GEMINI_API_KEY;
-      console.log('Gemini API Key:', api_key ? 'Present' : 'Missing');
+      // Use the secure Cloudflare function instead of calling Gemini API directly
+      const conversationHistory = messages.filter(msg => msg.id !== userMessage.id);
+      const fullMessages = [...conversationHistory, { sender: "user", text: input }];
 
-      // Format request according to Gemini API specifications (matching curl command)
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`, {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-goog-api-key": api_key
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `${systemPrompt}\n\nConversation history:\n${messages.filter(msg => msg.id !== userMessage.id).map(msg => `${msg.sender}: ${msg.text}`).join('\n')}\n\nUser: ${input}`
-                }
-              ]
-            }
-          ]
+          messages: fullMessages,
+          systemPrompt: systemPrompt
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Gemini API Error:', errorData);
-        throw new Error(`API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Chat API Error:', errorData);
+        throw new Error(`API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      console.log('Gemini API Response:', data);
+      console.log('Chat API Response:', data);
 
-      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      if (!data.text) {
         throw new Error('Invalid response format');
       }
 
       const botMessage = {
         id: messages.length + 2,
-        text: data.candidates[0].content.parts[0].text,
+        text: data.text,
         sender: "bot" as const
       };
 
