@@ -49,7 +49,8 @@ ${projects.map((proj, index) => `${index + 1}. ${proj.title} (${proj.year})
 2. Keep responses short and snappy max 3 sentences per reply, no long paragraphs.
 3. Use your knowledge to give accurate, relevant info about Julian and his work.
 4. If you're unsure about something, say so** and suggest the user visit the [Contact](https://julianschwab.dev/contact) page to reach Julian directly. Never guess.
-6. Mention Julian's love for **running, endurance sports, and the outdoors** where relevant.`;
+5. Mention Julian's love for **running, endurance sports, and the outdoors** where relevant.
+6. If users want to clear the conversation history, they can type "/clear" to start fresh.`;
 };
 
 const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
@@ -111,8 +112,22 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
     }
   }, [initialMessage]);
 
+  const resetChat = () => {
+    setMessages([
+      { id: 1, text: "Hi! I'm Max, Julian's AI assistant. How can I help you learn more about Julian?", sender: "bot" },
+      { id: 2, text: "Chat history cleared! 🧹 Fresh start, what would you like to know?", sender: "bot" }
+    ]);
+  };
+
   const handleSendMessage = async () => {
     if (input.trim() === "" || isLoading || !systemPrompt) return;
+
+    // Check for /clear command
+    if (input.trim() === "/clear") {
+      resetChat();
+      setInput("");
+      return;
+    }
 
     const userMessage = {
       id: messages.length + 1,
@@ -140,7 +155,7 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
             {
               parts: [
                 {
-                  text: `${systemPrompt}\n\nConversation history:\n${messages.map(msg => `${msg.sender}: ${msg.text}`).join('\n')}\n\nUser: ${input}`
+                  text: `${systemPrompt}\n\nConversation history:\n${messages.filter(msg => msg.id !== userMessage.id).map(msg => `${msg.sender}: ${msg.text}`).join('\n')}\n\nUser: ${input}`
                 }
               ]
             }
@@ -295,7 +310,7 @@ const Chatbot = ({ onExpand, initialMessage }: ChatbotProps) => {
                   textarea.style.borderRadius = '9999px';
                 }
               }}
-              placeholder="Ask me anything"
+              placeholder="Ask me anything (type /clear to reset)"
               className={`w-full py-2 px-4 resize-none overflow-y-auto scrollbar-none transition-all duration-200 ${theme === 'light'
                 ? 'bg-gray-100 text-gray-800 placeholder-gray-500 focus:bg-gray-50 shadow-sm shadow-gray-900/10'
                 : 'bg-white/5 text-white placeholder-gray-400 focus:bg-white/10 shadow-sm shadow-black/20'
