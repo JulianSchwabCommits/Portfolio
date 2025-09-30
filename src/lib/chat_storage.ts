@@ -1,4 +1,5 @@
-import { supabase } from './supabase';
+// Chat storage disabled - database operations moved to server-side
+// This functionality would require implementing secure chat API endpoints
 
 interface Message {
   id: number;
@@ -9,18 +10,11 @@ interface Message {
 // Create a new conversation and return its ID
 export const createChatConversation = async (): Promise<string | null> => {
   try {
-    const { data, error } = await supabase
-      .from('chat_conversations')
-      .insert({
-        visitor_ip: 'anonymous', // Use a fixed value instead of getting IP
-        user_agent: navigator.userAgent,
-        is_active: true
-      })
-      .select('id')
-      .single();
+    // TODO: Implement secure chat conversation API endpoint in data.js
+    console.warn('Chat conversation creation disabled - requires secure API implementation');
     
-    if (error) throw error;
-    return data.id as string;
+    // Generate a temporary local ID for now
+    return Math.random().toString(36).substring(2, 15);
   } catch (error) {
     console.error('Error creating chat conversation:', error);
     return null;
@@ -40,24 +34,8 @@ export const saveChatMessage = async (
       return true;
     }
     
-    // 1. Insert the message
-    const { error: messageError } = await supabase
-      .from('chat_messages')
-      .insert({
-        conversation_id: conversationId,
-        content: message.text,
-        sender: message.sender
-      });
-    
-    if (messageError) throw messageError;
-    
-    // 2. Update the last_message_at timestamp
-    const { error: updateError } = await supabase
-      .from('chat_conversations')
-      .update({ last_message_at: new Date().toISOString() })
-      .eq('id', conversationId);
-    
-    if (updateError) throw updateError;
+    // TODO: Implement secure chat message API endpoint in data.js
+    console.warn('Chat message saving disabled - requires secure API implementation');
     
     return true;
   } catch (error) {
@@ -71,24 +49,9 @@ export const saveConversationHistory = async (messages: Message[]): Promise<bool
   if (messages.length === 0) return false;
   
   try {
-    // Create a new conversation
-    const conversationId = await createChatConversation();
-    if (!conversationId) return false;
+    // TODO: Implement secure conversation history API endpoint in data.js
+    console.warn('Conversation history saving disabled - requires secure API implementation');
     
-    // Skip the first message and save the rest
-    const messagesToSave = messages.slice(1);
-    
-    if (messagesToSave.length === 0) return true; // No messages to save after skipping first
-    
-    // Save all messages except the first one
-    const messagePromises = messagesToSave.map(msg => 
-      saveChatMessage(conversationId, {
-        text: msg.text,
-        sender: msg.sender
-      })
-    );
-    
-    await Promise.all(messagePromises);
     return true;
   } catch (error) {
     console.error('Error saving conversation history:', error);
@@ -96,12 +59,11 @@ export const saveConversationHistory = async (messages: Message[]): Promise<bool
   }
 };
 
-// Get visitor IP address
+// Get visitor IP address (server-side only now)
 const getVisitorIP = async (): Promise<string> => {
   try {
-    const response = await fetch('https://api.ipify.org?format=json');
-    const data = await response.json() as { ip: string };
-    return data.ip;
+    // IP detection moved to server-side for security
+    return 'anonymous';
   } catch (error) {
     console.error('Error getting IP:', error);
     return 'unknown';

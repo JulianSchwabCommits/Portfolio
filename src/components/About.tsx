@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../utils/supabase';
+import { apiClient } from '../lib/api_client';
 import { use_theme } from '../context/ThemeContext';
 
 interface AboutData {
@@ -60,13 +60,13 @@ const About = () => {
   useEffect(() => {
     const fetch_about = async () => {
       try {
-        const { data, error } = await supabase
-          .from('about')
-          .select('*')
-          .single();
-
-        if (error) throw error;
-        set_about_data(data);
+        const data = await apiClient.getAbout();
+        
+        if (data && data.length > 0) {
+          set_about_data(data[0]);
+        } else {
+          throw new Error('No about data found');
+        }
       } catch (err) {
         set_error(err instanceof Error ? err.message : 'Failed to fetch about data');
       } finally {

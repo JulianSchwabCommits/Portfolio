@@ -1,48 +1,36 @@
-import { supabase } from '../lib/supabase';
+/**
+ * Secure Analytics API - All database operations happen server-side
+ * No direct database access from client-side code
+ */
 
 /**
- * Tracks a page view in the database
+ * Tracks a page view via secure API endpoint
  */
 export async function track_page_view(path: string): Promise<string | null> {
   try {
-    // Get user agent and referrer from browser
-    const user_agent = navigator.userAgent;
+    // Get client-side info that's safe to send
     const referrer = document.referrer;
     const screen_size = `${window.innerWidth}x${window.innerHeight}`;
     
-    try {
-      // First attempt: Try to use the record_page_view RPC function
-      const { data, error } = await supabase.rpc('record_page_view', {
+    const response = await fetch('/api/data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'track_page_view',
         page_path: path,
-        user_agent,
-        ip_address: 'anonymous', // For privacy reasons, we're using 'anonymous' instead of actual IP
         referrer,
         screen_size
-      });
-      
-      if (error) throw error;
-      return data as string;
-    } catch (rpcError) {
-      console.warn('RPC record_page_view failed, falling back to direct insert:', rpcError);
-      
-      // Fallback: Direct insert to page_views table
-      const sessionId = getSessionId();
-      const { data: insertData, error: insertError } = await supabase.from('page_views').insert({
-        page_path: path,
-        user_agent,
-        ip_address: 'anonymous',
-        referrer,
-        screen_size,
-        session_id: sessionId,
-        device_type: detectDeviceType(user_agent),
-        browser: detectBrowser(user_agent),
-        operating_system: detectOS(user_agent),
-        referrer_source: categorizeSources(referrer)
-      }).select('id').single();
-      
-      if (insertError) throw insertError;
-      return insertData?.id as string;
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+    
+    const data = await response.json();
+    return data.id || null;
   } catch (err) {
     console.error('Failed to track page view:', err);
     return null;
@@ -63,66 +51,6 @@ function getSessionId(): string {
   return sessionId;
 }
 
-// Helper to detect device type from user agent
-function detectDeviceType(userAgent: string): string {
-  if (/mobile|android|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent)) {
-    return 'Mobile';
-  } else if (/ipad|tablet/i.test(userAgent)) {
-    return 'Tablet';
-  } else {
-    return 'Desktop';
-  }
-}
-
-// Helper to detect browser from user agent
-function detectBrowser(userAgent: string): string {
-  if (/chrome/i.test(userAgent) && !/edge|edg/i.test(userAgent)) {
-    return 'Chrome';
-  } else if (/firefox/i.test(userAgent)) {
-    return 'Firefox';
-  } else if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) {
-    return 'Safari';
-  } else if (/edge|edg/i.test(userAgent)) {
-    return 'Edge';
-  } else if (/opera|opr/i.test(userAgent)) {
-    return 'Opera';
-  } else if (/msie|trident/i.test(userAgent)) {
-    return 'Internet Explorer';
-  } else {
-    return 'Other';
-  }
-}
-
-// Helper to detect OS from user agent
-function detectOS(userAgent: string): string {
-  if (/windows/i.test(userAgent)) {
-    return 'Windows';
-  } else if (/macintosh|mac os/i.test(userAgent)) {
-    return 'MacOS';
-  } else if (/linux/i.test(userAgent) && !/android/i.test(userAgent)) {
-    return 'Linux';
-  } else if (/android/i.test(userAgent)) {
-    return 'Android';
-  } else if (/iphone|ipad|ipod/i.test(userAgent)) {
-    return 'iOS';
-  } else {
-    return 'Other';
-  }
-}
-
-// Helper to categorize traffic sources
-function categorizeSources(referrer: string): string {
-  if (!referrer) {
-    return 'Direct';
-  } else if (/google|bing|yahoo|duckduckgo/i.test(referrer)) {
-    return 'Search';
-  } else if (/facebook|twitter|instagram|linkedin|pinterest|reddit/i.test(referrer)) {
-    return 'Social';
-  } else {
-    return 'Referral';
-  }
-}
-
 /**
  * Interaction types for tracking user actions
  */
@@ -141,7 +69,7 @@ export type InteractionType =
   | 'custom';
 
 /**
- * Tracks a user interaction in the database
+ * Tracks a user interaction via secure API endpoint
  */
 export async function track_interaction(
   action_type: InteractionType,
@@ -153,30 +81,33 @@ export async function track_interaction(
   y_position?: number
 ): Promise<string | null> {
   try {
-    // Get current path and user agent
+    // Get current path
     const page_path = window.location.pathname;
-    const user_agent = navigator.userAgent;
     
-    // Call the record_user_interaction function in Supabase
-    const { data, error } = await supabase.rpc('record_user_interaction', {
-      action_type,
-      page_path,
-      ip_address: 'anonymous', // For privacy reasons
-      user_agent,
-      element_id: element_id || null,
-      element_class: element_class || null,
-      element_type: element_type || null,
-      x_position: x_position || null,
-      y_position: y_position || null,
-      value: value || null
+    const response = await fetch('/api/data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'track_interaction',
+        action_type,
+        page_path,
+        element_id: element_id || null,
+        element_class: element_class || null,
+        element_type: element_type || null,
+        x_position: x_position || null,
+        y_position: y_position || null,
+        value: value || null
+      })
     });
     
-    if (error) {
-      console.error('Error tracking interaction:', error);
-      return null;
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
-    return data as string;
+    const data = await response.json();
+    return data.id || null;
   } catch (err) {
     console.error('Failed to track interaction:', err);
     return null;

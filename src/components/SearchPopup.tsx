@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { use_theme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
+import { apiClient } from '../lib/api_client';
 import ChatbotPopup from './ChatbotPopup';
 
 interface SearchItem {
@@ -109,15 +109,8 @@ const SearchPopup = () => {
 
   useEffect(() => {
     const fetch_data = async () => {
-      const { data: projects_data } = await supabase
-        .from('projects')
-        .select('*')
-        .order('id', { ascending: false });
-
-      const { data: experiences_data } = await supabase
-        .from('experiences')
-        .select('*')
-        .order('id', { ascending: false });
+      const projects_data = await apiClient.getProjects();
+      const experiences_data = await apiClient.getExperiences();
 
       set_projects(projects_data?.map(p => ({
         id: p.id,
