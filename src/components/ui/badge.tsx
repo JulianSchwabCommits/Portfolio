@@ -2,9 +2,10 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { DESIGN_TOKENS } from "@/design-tokens"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  `inline-flex items-center ${DESIGN_TOKENS.BORDER_RADIUS.BUTTON_PILL} border px-2.5 py-0.5 ${DESIGN_TOKENS.TYPOGRAPHY.PILL_TEXT} ${DESIGN_TOKENS.ANIMATION.COLOR_TRANSITION} focus:outline-none ${DESIGN_TOKENS.STATES.FOCUS_RING} focus:ring-ring focus:ring-offset-2`,
   {
     variants: {
       variant: {
