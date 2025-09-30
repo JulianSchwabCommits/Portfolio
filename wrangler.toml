@@ -5,6 +5,10 @@ main = "src/worker.js"
 [assets]
 directory = "./dist"
 
+# Pages Functions Configuration
+[[pages.functions]]
+directory = "functions"
+
 # Security Headers (fallback)
 [[headers]]
 for = "/*"
