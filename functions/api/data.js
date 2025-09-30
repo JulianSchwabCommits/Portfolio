@@ -118,7 +118,8 @@ export async function onRequestGet({ request, env }) {
         if (id) query = query.eq('id', id);
         break;
       case 'about':
-        // No additional filtering needed for about
+        query = query.order('id', { ascending: true });
+        if (id) query = query.eq('id', id);
         break;
     }
     
