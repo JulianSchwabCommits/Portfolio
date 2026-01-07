@@ -16,7 +16,6 @@ const No = () => {
   const { theme } = use_theme();
   const [reason, setReason] = useState<NoReason | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const getRandomReasonFromLocal = (): NoReason => {
     const randomIndex = Math.floor(Math.random() * reasonsData.length);
@@ -30,7 +29,6 @@ const No = () => {
 
   const fetchReason = async () => {
     setLoading(true);
-    setError(null);
     
     try {
       const response = await fetch("/api/no");
@@ -52,7 +50,7 @@ const No = () => {
       const data = await response.json();
       setReason(data);
     } catch (err) {
-      // Fallback to local data on error
+      // Always fallback to local data on error - no error state needed
       console.log("Error fetching from API, using local data:", err);
       setReason(getRandomReasonFromLocal());
     } finally {
@@ -103,15 +101,7 @@ const No = () => {
                 </div>
               )}
               
-              {error && (
-                <div className="py-12">
-                  <p className={`text-red-500 ${DESIGN_TOKENS.TYPOGRAPHY.BODY_DEFAULT}`}>
-                    {error}
-                  </p>
-                </div>
-              )}
-              
-              {!loading && !error && reason && (
+              {!loading && reason && (
                 <div className="space-y-6">
                   <p className={`${DESIGN_TOKENS.TYPOGRAPHY.BODY_LARGE} font-medium leading-relaxed`}>
                     {reason.reason}

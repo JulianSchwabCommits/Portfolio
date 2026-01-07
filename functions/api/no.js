@@ -1,7 +1,7 @@
 import reasons from '../../src/data/reasons.json';
 
 // GET endpoint to fetch a random "no" reason
-export async function onRequestGet({ request }) {
+export async function onRequestGet() {
   try {
     // Get a random reason from the array
     const randomIndex = Math.floor(Math.random() * reasons.length);
