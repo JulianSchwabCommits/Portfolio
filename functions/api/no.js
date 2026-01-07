@@ -9,7 +9,8 @@ export async function onRequestGet({ request }) {
 
     return new Response(JSON.stringify({ 
       reason: randomReason,
-      index: randomIndex,
+      // Return 1-based index for human-readable display
+      index: randomIndex + 1,
       total: reasons.length
     }), {
       headers: { 

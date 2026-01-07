@@ -22,7 +22,8 @@ const No = () => {
     const randomIndex = Math.floor(Math.random() * reasonsData.length);
     return {
       reason: reasonsData[randomIndex],
-      index: randomIndex,
+      // Return 1-based index for human-readable display
+      index: randomIndex + 1,
       total: reasonsData.length
     };
   };
@@ -120,7 +121,7 @@ const No = () => {
                     theme === 'light' ? 'border-gray-300' : 'border-white/10'
                   }`}>
                     <span className={`${DESIGN_TOKENS.TYPOGRAPHY.BODY_SMALL} ${DESIGN_TOKENS.OPACITY.DEFAULT}`}>
-                      Reason #{reason.index + 1} of {reason.total}
+                      Reason #{reason.index} of {reason.total}
                     </span>
                   </div>
                 </div>
