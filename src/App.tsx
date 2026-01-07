@@ -10,6 +10,7 @@ import Work from "./pages/Work";
 import About from "./pages/About";
 import Play from "./pages/Play";
 import Contact from "./pages/Contact";
+import No from "./pages/No";
 import NotFound from "./pages/NotFound";
 import CursorShadow from "./components/CursorShadow";
 import SearchPopup from "./components/SearchPopup";
@@ -31,6 +32,7 @@ const AnimatedRoutes = () => {
         <Route path="/about" element={<About />} />
         <Route path="/play" element={<Play />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/no" element={<No />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/experiences/:id" element={<ExperienceDetail />} />
         <Route path="*" element={<NotFound />} />
