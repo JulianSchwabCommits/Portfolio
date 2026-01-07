@@ -1,3 +1,8 @@
+/**
+ * A collection of 975 unique, humorous reasons for saying "no"
+ * Used by the /api/no endpoint to return random responses
+ * @type {string[]}
+ */
 export const reasons = [
   "In a different season of life, I might say yes—but not right now.",
   "While I appreciate it, pursuing this isn't something I can commit to.",

@@ -18,7 +18,7 @@ export async function onRequestGet() {
     });
 
   } catch (error) {
-    console.error('No endpoint error:', error);
+    console.error('Error in /api/no endpoint:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
       message: error.message 
