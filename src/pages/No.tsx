@@ -4,6 +4,7 @@ import { RefreshCw } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import { use_theme } from "../context/ThemeContext";
 import { DESIGN_TOKENS, commonPatterns } from "@/design-tokens";
+import reasonsData from "../../reasons.json";
 
 interface NoReason {
   reason: string;
@@ -17,12 +18,31 @@ const No = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const getRandomReasonFromLocal = (): NoReason => {
+    const randomIndex = Math.floor(Math.random() * reasonsData.length);
+    return {
+      reason: reasonsData[randomIndex],
+      index: randomIndex,
+      total: reasonsData.length
+    };
+  };
+
   const fetchReason = async () => {
     setLoading(true);
     setError(null);
     
     try {
       const response = await fetch("/api/no");
+      
+      // Check if we got HTML back (dev mode fallback)
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        // Fallback to local data in development
+        console.log("API not available, using local data");
+        setReason(getRandomReasonFromLocal());
+        setLoading(false);
+        return;
+      }
       
       if (!response.ok) {
         throw new Error("Failed to fetch reason");
@@ -31,7 +51,9 @@ const No = () => {
       const data = await response.json();
       setReason(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      // Fallback to local data on error
+      console.log("Error fetching from API, using local data:", err);
+      setReason(getRandomReasonFromLocal());
     } finally {
       setLoading(false);
     }
@@ -82,7 +104,7 @@ const No = () => {
               
               {error && (
                 <div className="py-12">
-                  <p className="text-red-500 ${DESIGN_TOKENS.TYPOGRAPHY.BODY_DEFAULT}">
+                  <p className={`text-red-500 ${DESIGN_TOKENS.TYPOGRAPHY.BODY_DEFAULT}`}>
                     {error}
                   </p>
                 </div>
