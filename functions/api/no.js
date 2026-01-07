@@ -1,4 +1,4 @@
-import reasons from '../../reasons.json';
+import reasons from '../../src/data/reasons.json';
 
 // GET endpoint to fetch a random "no" reason
 export async function onRequestGet({ request }) {
@@ -15,7 +15,8 @@ export async function onRequestGet({ request }) {
       headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache' // Don't cache so we get random reasons
+        // Don't cache so we get random reasons each time
+        'Cache-Control': 'no-cache'
       }
     });
 

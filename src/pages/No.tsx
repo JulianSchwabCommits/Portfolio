@@ -4,7 +4,7 @@ import { RefreshCw } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import { use_theme } from "../context/ThemeContext";
 import { DESIGN_TOKENS, commonPatterns } from "@/design-tokens";
-import reasonsData from "../../reasons.json";
+import reasonsData from "@/data/reasons.json";
 
 interface NoReason {
   reason: string;
